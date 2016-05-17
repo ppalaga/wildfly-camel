@@ -48,15 +48,17 @@ public final class WildFlyCamelConfigPlugin implements ConfigPlugin {
     }
 
     @Override
-    public void applyStandaloneConfigChange(ConfigContext context, boolean enable) {
+    public boolean applyStandaloneConfigChange(ConfigContext context, boolean enable) {
         updateExtension(context, enable);
         updateSystemProperties(context, enable);
         updateSubsystem(context, enable);
         updateSecurityDomain(context, enable);
+        return true;
     }
 
     @Override
-    public void applyDomainConfigChange(ConfigContext context, boolean enable) {
+    public boolean applyDomainConfigChange(ConfigContext context, boolean enable) {
+        return false;
     }
 
     private static void updateExtension(ConfigContext context, boolean enable) {

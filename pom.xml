@@ -54,7 +54,7 @@
         <version.io.netty41>4.1.8.Final</version.io.netty41> 
 
         <!-- WildFly versions -->
-        <version.wildfly>10.1.0.Final</version.wildfly>
+        <version.wildfly>10.2.0.Final-SNAPSHOT</version.wildfly>
         <version.wildfly.arquillian>1.0.2.Final</version.wildfly.arquillian>
         <version.wildfly.fasterxml.jackson>2.7.4</version.wildfly.fasterxml.jackson>
         <version.wildfly.infinispan>8.2.4.Final</version.wildfly.infinispan>
@@ -78,7 +78,7 @@
         <version.codehaus.plexus.utils>3.0.15</version.codehaus.plexus.utils>
         <version.eclipse.egit.github>2.1.5</version.eclipse.egit.github>
         <version.flapdoodle.embed.mongo>1.50.1</version.flapdoodle.embed.mongo>
-        <version.fusepatch>2.6.0</version.fusepatch>
+        <version.fusepatch>2.8.0-SNAPSHOT</version.fusepatch>
         <version.greenmail>1.4.0</version.greenmail>
         <version.hawtio>1.5.3</version.hawtio>
         <version.javax.cache.api>1.0.0</version.javax.cache.api>
