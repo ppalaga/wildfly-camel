@@ -216,6 +216,7 @@
 
     <module name="com.fasterxml.jackson.skipped" skip="true">
         <include artifact=":jackson-module-afterburner" />
+        <include artifact=":jackson-module-jsonSchema" />
     </module>
     
     <module name="com.github.generex">

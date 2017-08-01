@@ -1476,6 +1476,7 @@
             <include module="joda-time" />
             <include module="org.apache.camel.apt" />
             <include module="org.springframework.boot" />
+            <include module="com.fasterxml.jackson.skipped" />
         </apply-to-dependencies>
         <dependencies>
             <module name="javax.api" />

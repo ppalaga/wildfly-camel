@@ -183,6 +183,20 @@ zendesk
 zookeeper-master
 
 [undecided]
+atomix-map
+atomix-messaging
+atomix-multimap
+atomix-queue
+atomix-set
+atomix-value
+bigquery
+caffeine-cache
+caffeine-loadcache
+crypto-cms
+iec60870-client
+iec60870-server
+thrift
+twilio
 
 [rejected]
 apns
