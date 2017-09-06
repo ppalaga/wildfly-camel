@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
+import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -35,13 +36,13 @@ import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.dmr.ModelNode;
 import org.jboss.gravia.resource.ManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.camel.test.common.utils.DMRUtils;
 import org.wildfly.camel.test.common.utils.LogUtils;
-import org.wildfly.camel.test.spring.subD.LogBean;
 import org.wildfly.extension.camel.CamelAware;
 import org.wildfly.extension.camel.CamelContextRegistry;
 
@@ -50,19 +51,50 @@ import org.wildfly.extension.camel.CamelContextRegistry;
 @ServerSetup({SpringLogIntegrationTest.LogSetupTask.class})
 public class SpringLogIntegrationTest {
 
-    private static final Path CUSTOM_LOG_FILE = Paths.get(System.getProperty("jboss.server.log.dir"), "camel-log-test.log");
+    private static final String LOGGING_CONTEXT_XML_TEMPLATE = "<beans xmlns=\"http://www.springframework.org/schema/beans\"" //
++ "       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" //
++ "       xsi:schemaLocation=\"http://www.springframework.org/schema/beans" //
++ "                           http://www.springframework.org/schema/beans/spring-beans.xsd" //
++ "                           http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd\">" //
++ "    <camelContext id=\"%s\" xmlns=\"http://camel.apache.org/schema/spring\">" //
++ "        <route>" //
++ "            <from uri=\"direct:start\"/>" //
++ "            <log message=\"${body}\" loggingLevel=\"INFO\" logName=\"%s\" />" //
++ "        </route>" //
++ "    </camelContext>" //
++ "</beans>";
+
+    private static final String APP1 = "app1";
+    private static final String APP2 = "app2";
+
+    private static final String LOG1 = "log1";
+    private static final String LOG2 = "log2";
+
+    private static final String CONTEXT1 = "spring-context-1";
+    private static final String CONTEXT2 = "spring-context-2";
+
+    private static final Path LOG1_PATH = Paths.get(System.getProperty("jboss.server.log.dir"), LOG1 + ".log");
+    private static final Path LOG2_PATH = Paths.get(System.getProperty("jboss.server.log.dir"), LOG2 + ".log");
+
+    private static final String CATEGORY1 = "my.custom.log.category1";
+    private static final String CATEGORY2 = "my.custom.log.category2";
 
     static class LogSetupTask implements ServerSetupTask {
 
-        public static final String LOG_PROFILE_PREFIX = "subsystem=logging/logging-profile=camel-logging-profile";
+        public static final String LOG1_PROFILE_PREFIX = "subsystem=logging/logging-profile="+LOG1;
+        public static final String LOG2_PROFILE_PREFIX = "subsystem=logging/logging-profile="+LOG2;
 
         @Override
         public void setup(ManagementClient managementClient, String s) throws Exception {
             ModelNode batchNode = DMRUtils.batchNode()
-                .addStep(LOG_PROFILE_PREFIX, "add")
-                .addStep(LOG_PROFILE_PREFIX + "/file-handler=camel-log-file", "add(file={path=>camel-log-test.log,relative-to=>jboss.server.log.dir})")
-                .addStep(LOG_PROFILE_PREFIX + "/file-handler=camel-log-file", "change-log-level(level=INFO))")
-                .addStep(LOG_PROFILE_PREFIX + "/logger=" + LogBean.class.getName(), "add(level=INFO,handlers=[handler=camel-log-file])")
+                .addStep(LOG1_PROFILE_PREFIX, "add")
+                .addStep(LOG1_PROFILE_PREFIX + "/file-handler="+ LOG1, "add(file={path=>camel-log-test.log,relative-to=>jboss.server.log.dir})")
+                .addStep(LOG1_PROFILE_PREFIX + "/file-handler="+ LOG1, "change-log-level(level=INFO))")
+                .addStep(LOG1_PROFILE_PREFIX + "/logger="+ CATEGORY1, "add(level=INFO,handlers=[handler="+ LOG1 +"])")
+                .addStep(LOG2_PROFILE_PREFIX, "add")
+                .addStep(LOG2_PROFILE_PREFIX + "/file-handler="+ LOG2, "add(file={path=>camel-log-test.log,relative-to=>jboss.server.log.dir})")
+                .addStep(LOG2_PROFILE_PREFIX + "/file-handler="+ LOG2, "change-log-level(level=INFO))")
+                .addStep(LOG2_PROFILE_PREFIX + "/logger="+ CATEGORY2, "add(level=INFO,handlers=[handler="+ LOG2 +"])")
                 .build();
 
             ModelNode result = managementClient.getControllerClient().execute(batchNode);
@@ -71,7 +103,10 @@ public class SpringLogIntegrationTest {
 
         @Override
         public void tearDown(ManagementClient managementClient, String s) throws Exception {
-            ModelNode batchNode = DMRUtils.batchNode().addStep(LOG_PROFILE_PREFIX, "remove").build();
+            ModelNode batchNode = DMRUtils.batchNode() //
+                    .addStep(LOG1_PROFILE_PREFIX, "remove") //
+                    .addStep(LOG2_PROFILE_PREFIX, "remove") //
+                    .build();
             managementClient.getControllerClient().execute(batchNode);
         }
     }
@@ -79,29 +114,76 @@ public class SpringLogIntegrationTest {
     @ArquillianResource
     CamelContextRegistry contextRegistry;
 
-    @Deployment
-    public static JavaArchive createDeployment() {
-        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "spring-log-tests")
-            .addClasses(LogBean.class, LogUtils.class)
+    @ArquillianResource
+    public Deployer deployer;
+
+    @Deployment(name = APP1, managed = false)
+    public static JavaArchive app1() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "spring-log-tests"+APP1)
+            .addClasses(LogUtils.class)
             .setManifest(() -> {
                 ManifestBuilder builder = new ManifestBuilder();
-                builder.addManifestHeader("Logging-Profile", "camel-logging-profile");
+                builder.addManifestHeader("Logging-Profile", LOG1);
                 return builder.openStream();
             })
-            .addAsResource("spring/logging-camel-context.xml", "logging-camel-context.xml");
+            .addAsResource(new StringAsset(String.format(LOGGING_CONTEXT_XML_TEMPLATE, CONTEXT1, CATEGORY1)), "logging-camel-context.xml");
         return archive;
     }
 
-    @Test
-    public void testBeanLogger() throws Exception {
-        CamelContext camelctx = contextRegistry.getCamelContext("spring-context");
-        ProducerTemplate producer = camelctx.createProducerTemplate();
-        producer.requestBody("direct:start", "Hello Kermit");
-        assertLogFileContainsContent(".*" + LogBean.class.getName() + ".*Hello Kermit$");
+    @Deployment(name = APP2, managed = false)
+    public static JavaArchive app2() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "spring-log-tests"+APP2)
+            .addClasses(LogUtils.class)
+            .setManifest(() -> {
+                ManifestBuilder builder = new ManifestBuilder();
+                builder.addManifestHeader("Logging-Profile", LOG2);
+                return builder.openStream();
+            })
+            .addAsResource(new StringAsset(String.format(LOGGING_CONTEXT_XML_TEMPLATE, CONTEXT2, CATEGORY2)), "logging-camel-context.xml");
+        return archive;
     }
 
-    private void assertLogFileContainsContent(String assertion) throws IOException {
-        boolean logMessagePresent = LogUtils.awaitLogMessage(assertion, 5000, CUSTOM_LOG_FILE);
-        Assert.assertTrue("Gave up waiting to find matching log message", logMessagePresent);
+    /**
+     * @return an empty jar without which Arquillian won't inject the {@link #contextRegistry}
+     */
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class);
+    }
+
+    @Test
+    public void concurrentDeployments() throws Exception {
+
+        deployer.deploy(APP1);
+        deployer.deploy(APP2);
+
+        CamelContext camelctx1 = contextRegistry.getCamelContext(CONTEXT1);
+        ProducerTemplate producer1 = camelctx1.createProducerTemplate();
+        producer1.requestBody("direct:start", "Hello 1");
+
+
+        CamelContext camelctx2 = contextRegistry.getCamelContext(CONTEXT2);
+        ProducerTemplate producer2 = camelctx2.createProducerTemplate();
+        producer2.requestBody("direct:start", "Hello 2");
+
+        assertLogFileContent(".*"+ CATEGORY1 +".*Hello 1$", LOG1_PATH, true);
+        assertLogFileContent(".*"+ CATEGORY2 +".*Hello 2$", LOG2_PATH, true);
+
+        assertLogFileContent(".*"+ CATEGORY2 +".*Hello 2$", LOG1_PATH, false);
+        assertLogFileContent(".*"+ CATEGORY1 +".*Hello 1$", LOG2_PATH, false);
+
+        deployer.undeploy(APP2);
+        deployer.undeploy(APP1);
+
+    }
+
+    private static void assertLogFileContent(String pattern, Path file, boolean expected) throws IOException {
+        if (expected) {
+            boolean logMessagePresent = LogUtils.awaitLogMessage(pattern, 5000, file);
+            Assert.assertTrue("Gave up waiting for message "+ pattern + " in file "+ file.toString(), logMessagePresent);
+        } else {
+            boolean logMessagePresent = LogUtils.awaitLogMessage(pattern, 0, file);
+            Assert.assertFalse("Message "+ pattern + " not found in file "+ file.toString(), logMessagePresent);
+        }
     }
 }
