@@ -447,6 +447,6 @@
 /org/springframework/tx/main/spring-tx-4.3.10.RELEASE.jar
 /org/w3c/css/sac/main/sac-1.3.jar
 /org/wildfly/extension/camel/main/gravia-container-wildfly-extension-1.3.1.jar
-/org/wildfly/extras/config/main/fuse-patch-config-2.6.0.jar
-/org/wildfly/extras/patch/main/fuse-patch-core-2.6.0.jar
+/org/wildfly/extras/config/main/fuse-patch-config-2.6.0.-SRC-revision-6d64565c091296709f35a848c6e57812a65c27e6.jar
+/org/wildfly/extras/patch/main/fuse-patch-core-2.6.0.-SRC-revision-6d64565c091296709f35a848c6e57812a65c27e6.jar
 /xmlenc/main/xmlenc-0.52.jar
