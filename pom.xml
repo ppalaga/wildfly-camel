@@ -8,9 +8,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,21 +44,21 @@
 
     <!-- Properties -->
     <properties>
-        
+
         <!-- Camel versions -->
         <version.apache.camel>2.19.2</version.apache.camel>
         <version.apache.lucene>5.5.2</version.apache.lucene>
 
         <!-- [#1702] Upgrade to netty-4.1.9 -->
-        <version.io.netty40>4.0.45.Final</version.io.netty40> 
-        <version.io.netty41>4.1.8.Final</version.io.netty41> 
+        <version.io.netty40>4.0.45.Final</version.io.netty40>
+        <version.io.netty41>4.1.8.Final</version.io.netty41>
 
         <!-- WildFly versions -->
         <version.wildfly>10.1.0.Final</version.wildfly>
         <version.wildfly.arquillian>1.0.2.Final</version.wildfly.arquillian>
         <version.wildfly.fasterxml.jackson>2.7.4</version.wildfly.fasterxml.jackson>
         <version.wildfly.infinispan>8.2.4.Final</version.wildfly.infinispan>
-        
+
         <!-- Other versions -->
         <version.apache.ds>2.0.0-M21</version.apache.ds>
         <version.apache.ds.codec>1.0.0-M33</version.apache.ds.codec>
@@ -88,7 +88,6 @@
         <version.javax.cache.api>1.0.0</version.javax.cache.api>
         <version.jboss.arquillian.core>1.1.10.Final</version.jboss.arquillian.core>
         <version.jboss.arquillian.osgi>2.1.0.Final</version.jboss.arquillian.osgi>
-        <version.jboss.classfilewriter>1.1.2.Final</version.jboss.classfilewriter>
         <version.jboss.gravia>1.3.1</version.jboss.gravia>
         <version.jboss.osgi.metadata>4.0.0.CR1</version.jboss.osgi.metadata>
         <version.jboss.shrinkwrap.resolver>2.2.0</version.jboss.shrinkwrap.resolver>
@@ -156,14 +155,14 @@
                 <artifactId>args4j</artifactId>
                 <version>${version.args4j}</version>
             </dependency>
-            
+
             <!-- Aether -->
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-aether-provider</artifactId>
                 <version>${version.maven.aether.provider}</version>
             </dependency>
-            
+
             <!-- Arquillian -->
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
@@ -207,13 +206,6 @@
                 <type>pom</type>
             </dependency>
 
-            <!-- Classfilewriter -->
-            <dependency>
-                <groupId>org.jboss.classfilewriter</groupId>
-                <artifactId>jboss-classfilewriter</artifactId>
-                <version>${version.jboss.classfilewriter}</version>
-            </dependency>
-
             <!-- Felix -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -241,7 +233,7 @@
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${version.apache.felix.scr.ds.annotations}</version>
             </dependency>
-                
+
             <!-- FTP Server -->
             <dependency>
                 <groupId>org.apache.ftpserver</groupId>
@@ -278,7 +270,7 @@
                 <artifactId>org.eclipse.egit.github.core</artifactId>
                 <version>${version.eclipse.egit.github}</version>
             </dependency>
-            
+
             <!-- Gravia -->
             <dependency>
                 <groupId>org.jboss.gravia</groupId>
@@ -370,7 +362,7 @@
                 <artifactId>cache-api</artifactId>
                 <version>${version.javax.cache.api}</version>
             </dependency>
-            
+
             <!-- JBoss -->
             <dependency>
                 <groupId>org.jboss.osgi.metadata</groupId>
@@ -446,7 +438,7 @@
                 <artifactId>lucene-suggest</artifactId>
                 <version>${version.apache.lucene}</version>
             </dependency>
-            
+
             <!-- Mongo Embedded -->
             <dependency>
                 <groupId>de.flapdoodle.embed</groupId>
@@ -460,7 +452,7 @@
                 <artifactId>netty-all</artifactId>
                 <version>${version.io.netty41}</version>
             </dependency>
-            
+
             <!-- OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -530,7 +522,7 @@
                 <artifactId>xmlbeans</artifactId>
                 <version>${version.apache.xmlbeans}</version>
             </dependency>
-            
+
         </dependencies>
     </dependencyManagement>
 
@@ -767,7 +759,7 @@
                                 </requireJavaVersion>
                                 <requireMavenVersion>
                                     <version>3.2.3</version>
-                                </requireMavenVersion>                
+                                </requireMavenVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -810,7 +802,7 @@
         <system>GitHub</system>
         <url>https://github.com/${github.namespace}/${github.project}/issues</url>
     </issueManagement>
-    
+
     <!-- Repositories -->
     <repositories>
         <repository>

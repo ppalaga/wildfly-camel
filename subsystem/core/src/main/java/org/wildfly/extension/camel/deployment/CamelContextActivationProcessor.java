@@ -23,11 +23,15 @@ package org.wildfly.extension.camel.deployment;
 
 import static org.wildfly.extension.camel.CamelLogger.LOGGER;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.spring.SpringCamelContext;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
@@ -44,8 +48,6 @@ import org.wildfly.extension.camel.CamelConstants;
  */
 public class CamelContextActivationProcessor implements DeploymentUnitProcessor {
 
-    private final CamelContextActivator camelContextActivator = new CamelContextActivator();
-
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
 
@@ -55,6 +57,13 @@ public class CamelContextActivationProcessor implements DeploymentUnitProcessor 
         // Start the camel contexts
         for (CamelContext camelctx : depUnit.getAttachmentList(CamelConstants.CAMEL_CONTEXT_KEY)) {
             try {
+                CamelContextActivator camelContextActivator = (CamelContextActivator) Proxy.newProxyInstance(module.getClassLoader(), new Class<?>[]{CamelContextActivator.class}, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        camelctx.start();
+                        return null;
+                    }
+                });
                 camelContextActivator.activate(camelctx, module.getClassLoader());
             } catch (Exception ex) {
                 LOGGER.error("Cannot start camel context: " + camelctx.getName(), ex);
