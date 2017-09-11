@@ -4,12 +4,15 @@
                            http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <bean id="logger" class="org.wildfly.camel.test.spring.subD.LogBean" />
-
-    <camelContext id="spring-context" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="spring-logging-context" xmlns="http://camel.apache.org/schema/spring">
         <route>
-            <from uri="direct:start"/>
-            <bean ref="logger" method="log('INFO', ${body})" />
+            <from uri="direct:log-endpoint"/>
+            <to uri="log:org.wildfly.camel.test.spring" />
+        </route>
+
+        <route>
+            <from uri="direct:log-dsl" />
+            <log message="${body}" logName="org.wildfly.camel.test.spring" />
         </route>
     </camelContext>
 </beans>

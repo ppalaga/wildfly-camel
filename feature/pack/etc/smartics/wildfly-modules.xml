@@ -389,7 +389,11 @@
         <include artifact=":weld-osgi-bundle" />
         <include artifact=":weld-spi" />
     </module>
-    
+
+    <module name="org.jboss.classfilewriter" skip="true">
+        <include artifact=":jboss-classfilewriter"/>
+    </module>
+
     <module name="org.jboss.logging" skip="true">
         <include artifact=":jboss-logging"/>
     </module>

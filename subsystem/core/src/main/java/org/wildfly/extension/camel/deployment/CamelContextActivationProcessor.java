@@ -28,10 +28,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
+import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
+import org.jboss.modules.Module;
 import org.wildfly.extension.camel.CamelConstants;
 
 /**
@@ -42,14 +44,18 @@ import org.wildfly.extension.camel.CamelConstants;
  */
 public class CamelContextActivationProcessor implements DeploymentUnitProcessor {
 
+    private final CamelContextActivator camelContextActivator = new CamelContextActivator();
+
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
 
-        // Start the camel contexts
         DeploymentUnit depUnit = phaseContext.getDeploymentUnit();
+        Module module = depUnit.getAttachment(Attachments.MODULE);
+
+        // Start the camel contexts
         for (CamelContext camelctx : depUnit.getAttachmentList(CamelConstants.CAMEL_CONTEXT_KEY)) {
             try {
-                camelctx.start();
+                camelContextActivator.activate(camelctx, module.getClassLoader());
             } catch (Exception ex) {
                 LOGGER.error("Cannot start camel context: " + camelctx.getName(), ex);
             }
