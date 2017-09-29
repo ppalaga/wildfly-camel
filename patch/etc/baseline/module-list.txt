@@ -445,6 +445,7 @@
 /org/fusesource/hawtdispatch/main/hawtdispatch-1.22.jar
 /org/fusesource/hawtdispatch/main/hawtdispatch-transport-1.22.jar
 /org/fusesource/mqtt/main/mqtt-client-1.14.jar
+/org/fusesource/stompjms/stompjms-client/main/stompjms-client-1.19.jar
 /org/infinispan/jcache/main/infinispan-jcache-8.2.4.Final.jar
 /org/infinispan/jcache/main/infinispan-jcache-commons-8.2.4.Final.jar
 /org/infinispan/query/dsl/main/infinispan-query-dsl-9.1.1.Final.jar

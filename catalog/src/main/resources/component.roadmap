@@ -148,6 +148,7 @@ sql
 sql-stored
 ssh
 stax
+stomp
 stream
 string-template
 stub
@@ -294,7 +295,6 @@ solrs
 spark
 spark-rest
 spring-ws
-stomp
 telegram
 thrift
 twilio

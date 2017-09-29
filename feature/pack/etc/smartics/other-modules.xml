@@ -163,7 +163,7 @@
         <include artifact="com.amazonaws:aws-java-sdk-workspaces" />
         <include artifact="com.amazonaws:aws-java-sdk-xray" />
     </module>
-    
+
     <module name="com.box">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -173,7 +173,7 @@
             <exclude path="com/box/sdk/internal**" />
         </exports>
     </module>
-    
+
     <module name="com.codahale.metrics">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -199,7 +199,7 @@
         <include artifact="com.eclipsesource.minimal-json:minimal-json" />
     </module>
 
-    
+
     <module name="com.fasterxml.jackson.dataformat.cbor">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -251,7 +251,7 @@
     <module name="com.fasterxml.jackson.skipped" skip="true">
         <include artifact=":jackson-module-afterburner" />
     </module>
-    
+
     <module name="com.github.generex">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -335,7 +335,7 @@
             <exclude path="com/ning" />
         </exports>
     </module>
-    
+
     <module name="com.rometools.rome">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -590,7 +590,7 @@
             <module name="org.javassist"/>
         </dependencies>
     </module>
-    
+
     <module name="org.antlr.runtime">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -678,7 +678,7 @@
         </properties>
         <include artifact=":commons-exec" />
     </module>
-    
+
     <module name="org.apache.commons.httpclient">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -688,14 +688,14 @@
             <exclude path="org/apache/commons" />
         </exports>
     </module>
-    
+
     <module name="org.apache.commons.lang3">
         <properties>
             <property name="jboss.api" value="private"/>
         </properties>
         <include artifact="org.apache.commons:commons-lang3" />
     </module>
-    
+
     <module name="org.apache.commons.net">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -843,7 +843,7 @@
             <exclude path="org/I0Itec**" />
         </exports>
     </module>
-    
+
     <module name="org.apache.kafka.clients">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -942,7 +942,7 @@
             <module name="javax.api"/>
         </dependencies>
     </module>
-    
+
     <module name="org.apache.ws.commons.axiom.axiom-impl">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -1209,7 +1209,7 @@
             <exclude path="com/twitter**" />
         </exports>
     </module>
-    
+
     <module name="org.fusesource.hawtbuf">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -1229,6 +1229,21 @@
         <dependencies>
             <module name="org.fusesource.hawtbuf"/>
         </dependencies>
+        <exports>
+            <exclude path="org/fusesource" />
+            <exclude path="org/fusesource/hawtdispatch/internal**" />
+        </exports>
+    </module>
+
+    <module name="org.fusesource.stompjms.stompjms-client">
+        <include artifact="org.fusesource.stompjms:stompjms-client" />
+        <dependencies>
+            <module name="org.fusesource.hawtbuf" export="true"/>
+            <module name="org.fusesource.hawtdispatch" export="true"/>
+        </dependencies>
+        <exports>
+            <exclude path="org/fusesource" />
+        </exports>
     </module>
 
     <module name="org.fusesource.mqtt">
@@ -1285,7 +1300,7 @@
             <module name="org.drools.core" />
         </dependencies>
     </module>
-    
+
     <module name="org.kie.internal">
         <properties>
             <property name="jboss.api" value="private"/>
@@ -1300,7 +1315,7 @@
             <module name="org.drools.core" />
         </dependencies>
     </module>
-    
+
     <module name="org.kie.remote" >
         <include artifact="org.kie.remote:(.*)" />
         <include artifact="org.kie.remote.ws:(.*)" />
@@ -1389,7 +1404,7 @@
         </properties>
         <include artifact="org.scala-lang:scala-library" />
     </module>
-    
+
     <module name="org.scala.modules">
         <properties>
             <property name="jboss.api" value="private"/>

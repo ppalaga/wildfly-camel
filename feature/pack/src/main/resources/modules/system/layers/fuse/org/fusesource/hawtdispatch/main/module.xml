@@ -10,4 +10,8 @@
   <dependencies>
     <module name="org.fusesource.hawtbuf" />
   </dependencies>
+  <exports>
+    <exclude path="org/fusesource" />
+    <exclude path="org/fusesource/hawtdispatch/internal**" />
+  </exports>
 </module>

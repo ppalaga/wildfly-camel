@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="org.fusesource.stompjms.stompjms-client">
+  <resources>
+    <artifact name="${org.fusesource.stompjms:stompjms-client}" />
+  </resources>
+  <dependencies>
+    <module name="org.fusesource.hawtbuf" export="true" />
+    <module name="org.fusesource.hawtdispatch" export="true" />
+  </dependencies>
+  <exports>
+    <exclude path="org/fusesource" />
+  </exports>
+</module>
