@@ -8,9 +8,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,9 +44,9 @@
 
     <!-- Properties -->
     <properties>
-        
+
         <!-- Camel versions -->
-        <version.apache.camel>2.20.0-SNAPSHOT</version.apache.camel>
+        <version.apache.camel>2.20.0-SRC-revision-f0d881cd0cdb94eff09625390a80dc83e8ef95f4</version.apache.camel>
         <version.apache.lucene>5.5.2</version.apache.lucene>
         <version.io.netty40>4.0.51.Final</version.io.netty40>
         <version.io.netty41>4.1.15.Final</version.io.netty41>
@@ -57,7 +57,7 @@
         <version.wildfly.fasterxml.jackson>2.8.9</version.wildfly.fasterxml.jackson>
         <version.wildfly.infinispan>8.2.4.Final</version.wildfly.infinispan>
         <version.apache.cxf>3.1.12</version.apache.cxf>
-        
+
         <!-- Other versions -->
         <version.apache.ds>2.0.0-M21</version.apache.ds>
         <version.apache.ds.codec>1.0.0-M33</version.apache.ds.codec>
@@ -90,7 +90,7 @@
         <version.net.sf.json>2.4</version.net.sf.json>
         <version.osgi>5.0.0</version.osgi>
         <version.redis.embedded>0.6</version.redis.embedded>
-        
+
         <!-- Plugin versions -->
         <version-apache-scr-plugin>1.21.0</version-apache-scr-plugin>
         <version-asciidoctor-maven-plugin>1.5.3</version-asciidoctor-maven-plugin>
@@ -380,7 +380,7 @@
                                 </requireJavaVersion>
                                 <requireMavenVersion>
                                     <version>3.2.3</version>
-                                </requireMavenVersion>                
+                                </requireMavenVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -423,7 +423,7 @@
         <system>GitHub</system>
         <url>https://github.com/${github.namespace}/${github.project}/issues</url>
     </issueManagement>
-    
+
     <!-- Repositories -->
     <repositories>
         <repository>
