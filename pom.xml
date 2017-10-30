@@ -57,7 +57,7 @@
         <version.camel.qpid.proton>0.16.0</version.camel.qpid.proton>
 
         <!-- WildFly versions -->
-        <version.wildfly>11.0.0.Final</version.wildfly>
+        <version.wildfly>11.1.0.Beta1-SNAPSHOT</version.wildfly>
         <version.wildfly.arquillian>2.1.0.Final</version.wildfly.arquillian>
         <version.wildfly.cxf>3.1.12</version.wildfly.cxf>
         <version.wildfly.fasterxml.jackson>2.8.9</version.wildfly.fasterxml.jackson>
@@ -76,7 +76,7 @@
         <version.arquillian.cube>1.6.0</version.arquillian.cube>
         <version.eclipse.egit.github>2.1.5</version.eclipse.egit.github>
         <version.flapdoodle.embed.mongo>1.50.1</version.flapdoodle.embed.mongo>
-        <version.fusepatch>3.0.0</version.fusepatch>
+        <version.fusepatch>3.1.0-SNAPSHOT</version.fusepatch>
         <version.greenmail>1.4.0</version.greenmail>
         <version.hawtio>1.5.5</version.hawtio>
         <version.javax.cache.api>1.0.0</version.javax.cache.api>
