@@ -60,11 +60,16 @@
         <version.camel.qpid.proton>0.26.0</version.camel.qpid.proton>
 
         <!-- WildFly versions -->
-        <version.wildfly>12.0.0.Final</version.wildfly>
+        <version.wildfly>13.0.0.Beta2-SNAPSHOT</version.wildfly>
         <version.wildfly.arquillian>2.1.0.Final</version.wildfly.arquillian>
-        <version.wildfly.cxf>3.2.2</version.wildfly.cxf>
-        <version.wildfly.fasterxml.jackson>2.9.4</version.wildfly.fasterxml.jackson>
-        <version.wildfly.infinispan>9.1.6.Final</version.wildfly.infinispan>
+        <version.wildfly.cxf>3.2.4-jbossorg-1</version.wildfly.cxf>
+        <version.wildfly.fasterxml.jackson.core>2.9.5</version.wildfly.fasterxml.jackson.core>
+        <version.wildfly.fasterxml.jackson.datatype>2.9.5</version.wildfly.fasterxml.jackson.datatype>
+        <version.wildfly.fasterxml.jackson.jaxrs>2.9.5</version.wildfly.fasterxml.jackson.jaxrs>
+        <version.wildfly.fasterxml.jackson.module>2.9.5</version.wildfly.fasterxml.jackson.module>
+        <version.com.fasterxml.jackson.dataformat>${version.wildfly.fasterxml.jackson.core}</version.com.fasterxml.jackson.dataformat>
+        <version.com.fasterxml.jackson.jr>${version.wildfly.fasterxml.jackson.core}</version.com.fasterxml.jackson.jr>
+        <version.wildfly.infinispan>9.2.3.Final</version.wildfly.infinispan>
 
         <!-- Other versions -->
         <version.apache.ds>2.0.0-M21</version.apache.ds>
@@ -79,7 +84,7 @@
         <version.arquillian.cube>1.6.0</version.arquillian.cube>
         <version.eclipse.egit.github>2.1.5</version.eclipse.egit.github>
         <version.flapdoodle.embed.mongo>1.50.1</version.flapdoodle.embed.mongo>
-        <version.fusepatch>4.0.0</version.fusepatch>
+        <version.fusepatch>5.0.0-SNAPSHOT</version.fusepatch>
         <version.greenmail>1.4.0</version.greenmail>
         <version.hawtio>1.5.9</version.hawtio>
         <version.javax.cache.api>1.0.0</version.javax.cache.api>
@@ -123,7 +128,7 @@
         <version-editorconfig-maven-plugin>0.0.4</version-editorconfig-maven-plugin>
         <version-shrinkwrap-resolver-maven-plugin>2.2.6</version-shrinkwrap-resolver-maven-plugin>
         <version-smartics-maven-plugin>2.1.5</version-smartics-maven-plugin>
-        <version-wildfly-build-tools>1.2.9.Final</version-wildfly-build-tools>
+        <version-wildfly-build-tools>1.2.10.Final</version-wildfly-build-tools>
         <version-wildfly-licenses-plugin>2.0.0.Beta1</version-wildfly-licenses-plugin>
         <version-wildfly-maven-plugin>1.2.0.Final</version-wildfly-maven-plugin>
         <version-xml-maven-plugin>1.0.1</version-xml-maven-plugin>

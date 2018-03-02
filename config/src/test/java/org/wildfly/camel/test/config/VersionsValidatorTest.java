@@ -50,7 +50,7 @@ public class VersionsValidatorTest {
     public void before() throws Exception {
         camelRoot = getRootNode("camel-parent");
         wfcRoot = getRootNode("wildfly-camel");
-        wfRoot = getRootNode("wildfly-parent");
+        wfRoot = getRootNode("wildfly-component-matrix");
 
         mapping.put("version.camel.apns", "java-apns-version");
         mapping.put("version.camel.jgroups", "jgroups-version");
@@ -66,7 +66,10 @@ public class VersionsValidatorTest {
         mapping.put("version.camel.opencmis", "cmis-version");
         mapping.put("version.wildfly.arquillian", "version.org.wildfly.arquillian");
         mapping.put("version.wildfly.cxf", "version.org.apache.cxf");
-        mapping.put("version.wildfly.fasterxml.jackson", "version.com.fasterxml.jackson");
+        mapping.put("version.wildfly.fasterxml.jackson.core", "version.com.fasterxml.jackson.core");
+        mapping.put("version.wildfly.fasterxml.jackson.datatype", "version.com.fasterxml.jackson.datatype");
+        mapping.put("version.wildfly.fasterxml.jackson.jaxrs", "version.com.fasterxml.jackson.jaxrs");
+        mapping.put("version.wildfly.fasterxml.jackson.module", "version.com.fasterxml.jackson.module");
         mapping.put("version.wildfly.infinispan", "version.org.infinispan");
     }
 

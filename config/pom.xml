@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>org.wildfly</groupId>
-            <artifactId>wildfly-parent</artifactId>
+            <artifactId>wildfly-component-matrix</artifactId>
             <version>${version.wildfly}</version>
             <scope>test</scope>
             <type>pom</type>
@@ -117,11 +117,11 @@
                     <tasks>
                         <echo>${basedir}/../pom.xml</echo>
                         <echo>${maven.dependency.org.apache.camel.camel-parent.pom.path}</echo>
-                        <echo>${maven.dependency.org.wildfly.wildfly-parent.pom.path}</echo>
+                        <echo>${maven.dependency.org.wildfly.wildfly-component-matrix.pom.path}</echo>
                         <propertyfile file="target/pom-paths.txt">
                             <entry key="wildfly-camel" value="${basedir}/../pom.xml" />
                             <entry key="camel-parent" value="${maven.dependency.org.apache.camel.camel-parent.pom.path}" />
-                            <entry key="wildfly-parent" value="${maven.dependency.org.wildfly.wildfly-parent.pom.path}" />
+                            <entry key="wildfly-component-matrix" value="${maven.dependency.org.wildfly.wildfly-component-matrix.pom.path}" />
                         </propertyfile>
                         <copy file="${project.build.directory}/${jboss.server.name}/standalone/configuration/standalone.xml" todir="${project.build.testOutputDirectory}" overwrite="true" />
                     </tasks>
