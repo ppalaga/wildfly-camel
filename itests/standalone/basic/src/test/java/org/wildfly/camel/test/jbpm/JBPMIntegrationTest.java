@@ -27,10 +27,12 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.extension.camel.CamelAware;
 
+@Ignore("https://github.com/wildfly-extras/wildfly-camel/issues/2467")
 @CamelAware
 @RunWith(Arquillian.class)
 public class JBPMIntegrationTest {
