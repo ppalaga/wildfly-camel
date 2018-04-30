@@ -40,14 +40,14 @@ import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.transport.http.DestinationRegistry;
 import org.apache.cxf.transport.https.CertConstraintsJaxBUtils;
 import org.apache.cxf.transport.servlet.ServletDestination;
+import org.wildfly.extension.camel.service.CamelEndpointDeploymentSchedulerService.EndpointHttpHandler;
 
-public class UndertowHTTPDestination extends ServletDestination {
+public class UndertowHTTPDestination extends ServletDestination implements EndpointHttpHandler {
 
     private static final Logger LOG = LogUtils.getL7dLogger(UndertowHTTPDestination.class);
 
     protected HttpServerEngine engine;
     protected HttpServerEngineFactory serverEngineFactory;
-    protected ServletContext servletContext;
     protected URL nurl;
     protected ClassLoader loader;
 
@@ -79,10 +79,6 @@ public class UndertowHTTPDestination extends ServletDestination {
 
     protected Logger getLogger() {
         return LOG;
-    }
-
-    public void setServletContext(ServletContext sc) {
-        servletContext = sc;
     }
 
     /**
@@ -169,14 +165,7 @@ public class UndertowHTTPDestination extends ServletDestination {
         }
     }
 
-    public void doService(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        doService(servletContext, req, resp);
-    }
-
-    public void doService(ServletContext context, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (context == null) {
-            context = servletContext;
-        }
+    public void service(ServletContext context, HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         ClassLoaderHolder origLoader = null;
         Bus origBus = BusFactory.getAndSetThreadDefaultBus(bus);
@@ -193,5 +182,9 @@ public class UndertowHTTPDestination extends ServletDestination {
                 origLoader.reset();
             }
         }
+    }
+
+    public ClassLoader getClassLoader() {
+        return loader;
     }
 }
