@@ -20,105 +20,63 @@
 package org.apache.cxf.transport.undertow.wildfly;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.cxf.transport.undertow.AbstractHTTPServerEngine;
-import org.apache.cxf.transport.undertow.UndertowHTTPDestination;
 import org.apache.cxf.transport.undertow.UndertowHTTPHandler;
 import org.jboss.gravia.runtime.ServiceLocator;
-import org.wildfly.extension.undertow.Host;
-
-import io.undertow.server.HttpHandler;
-import io.undertow.servlet.Servlets;
-import io.undertow.servlet.api.DeploymentInfo;
-import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.SecurityConstraint;
-import io.undertow.servlet.api.SecurityInfo;
-import io.undertow.servlet.api.ServletInfo;
-import io.undertow.servlet.api.TransportGuaranteeType;
-import io.undertow.servlet.api.WebResourceCollection;
-import io.undertow.servlet.core.ManagedServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.extension.camel.service.CamelDynamicDeploymentService;
 
 class WildflyHTTPServerEngine extends AbstractHTTPServerEngine {
-
-    private final Host defaultHost;
-    private DeploymentManager manager;
+    private static final Logger LOG = LoggerFactory.getLogger(WildflyHTTPServerEngine.class);
+    private final CamelDynamicDeploymentService camelDynamicDeploymentService;
 
     WildflyHTTPServerEngine(String protocol, String host, int port) {
         super(protocol, host, port);
-        defaultHost = ServiceLocator.getRequiredService(Host.class);
+        camelDynamicDeploymentService = ServiceLocator.getService(CamelDynamicDeploymentService.class);
+        LOG.warn("camelDynamicDeploymentService = " + camelDynamicDeploymentService);
     }
 
     public void addServant(URL nurl, UndertowHTTPHandler handler) {
 
-        ServletInfo servletInfo = Servlets.servlet("DefaultServlet", DefaultServlet.class)
-            .addMapping("/*")
-            .setAsyncSupported(true);
+        if (camelDynamicDeploymentService != null) {
+            BiFunction<HttpServletRequest, HttpServletResponse, Void> handlerFunction = (req, res) -> {
+                try {
+                    handler.getHTTPDestination().doService(req, res);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return null;
+            };
+            Consumer<ServletContext> servletContextConsumer = (servletContext) -> {
+                handler.getHTTPDestination().setServletContext(servletContext);
+            };
 
-        DeploymentInfo servletBuilder = Servlets.deployment()
-            .setClassLoader(WildflyHTTPServerEngine.class.getClassLoader())
-            .setContextPath(nurl.getPath())
-            .setDeploymentName("cxfdestination.war")
-            .addServlets(servletInfo);
-
-        if (nurl.getProtocol().equals("https")) {
-            SecurityConstraint securityConstraint = new SecurityConstraint();
-            WebResourceCollection webResourceCollection = new WebResourceCollection();
-            webResourceCollection.addUrlPattern("/*");
-
-            securityConstraint.addWebResourceCollection(webResourceCollection);
-            securityConstraint.setTransportGuaranteeType(TransportGuaranteeType.CONFIDENTIAL);
-            securityConstraint.setEmptyRoleSemantic(SecurityInfo.EmptyRoleSemantic.PERMIT);
-
-            servletBuilder.addSecurityConstraint(securityConstraint);
-            servletBuilder.setConfidentialPortManager(exchange -> {
-                int port = exchange.getConnection().getLocalAddress(InetSocketAddress.class).getPort();
-                return defaultHost.getServer().getValue().lookupSecurePort(port);
-            });
+            try {
+                camelDynamicDeploymentService.deploy(nurl.toURI(), handlerFunction, servletContextConsumer,
+                        WildflyHTTPServerEngine.class.getClassLoader());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        manager = Servlets.defaultContainer().addDeployment(servletBuilder);
-        manager.deploy();
-
-        try {
-            HttpHandler servletHandler = manager.start();
-            defaultHost.registerDeployment(manager.getDeployment(), servletHandler);
-
-            UndertowHTTPDestination destination = handler.getHTTPDestination();
-            destination.setServletContext(manager.getDeployment().getServletContext());
-
-            ManagedServlet managedServlet = manager.getDeployment().getServlets().getManagedServlet("DefaultServlet");
-            DefaultServlet servletInstance = (DefaultServlet) managedServlet.getServlet().getInstance();
-            servletInstance.setHTTPDestination(destination);
-        } catch (ServletException ex) {
-            throw new IllegalStateException(ex);
-        }
     }
 
     public void removeServant(URL nurl) {
-        if (manager != null) {
-            defaultHost.unregisterDeployment(manager.getDeployment());
+        try {
+            camelDynamicDeploymentService.undeploy(nurl.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("serial")
-    static class DefaultServlet extends HttpServlet {
-
-        private UndertowHTTPDestination destination;
-
-        void setHTTPDestination(UndertowHTTPDestination destination) {
-            this.destination = destination;
-        }
-
-        @Override
-        protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-            destination.doService(req, res);
-        }
-    }
 }
