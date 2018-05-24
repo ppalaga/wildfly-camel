@@ -75,7 +75,6 @@ public final class HttpRequest {
         private String requestUrl;
         private String method;
         private String content;
-        private boolean followRedirects = true;
         private long timeout = 10;
         private boolean throwExceptionOnFailure = true;
         private Map<String, String> headers = new HashMap<>();
@@ -88,11 +87,6 @@ public final class HttpRequest {
 
         public HttpRequestBuilder content(String value) {
             this.content = value;
-            return this;
-        }
-
-        public HttpRequestBuilder followRedirects(boolean followRedirects) {
-            this.followRedirects = followRedirects;
             return this;
         }
 
@@ -125,7 +119,6 @@ public final class HttpRequest {
                     final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setDoInput(true);
                     conn.setRequestMethod(method);
-                    conn.setInstanceFollowRedirects(followRedirects);
 
                     Set<String> headerNames = headers.keySet();
                     for(String headerName : headerNames) {
