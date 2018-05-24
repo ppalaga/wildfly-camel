@@ -34,7 +34,7 @@ public class RestService {
     @Resource(mappedName = "java:jboss/camel/context/jndi-delayed-binding-spring-context")
     private CamelContext camelctxB;
 
-    @Resource(name = "java:jboss/camel/context/jndi-delayed-binding-spring-context")
+    @Resource(lookup = "java:jboss/camel/context/jndi-delayed-binding-spring-context")
     private CamelContext camelctxC;
 
     @GET
