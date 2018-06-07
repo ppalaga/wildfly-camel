@@ -68,14 +68,25 @@ public class SecurityUtils {
             + "<display-name>SecurityConstraint</display-name>" //
             + "<web-resource-collection>" //
             + "<web-resource-name>All Resources</web-resource-name>" //
-            + "<url-pattern>///*</url-pattern>" //
+            + "<url-pattern>///webservices/greeting-secure-cdi</url-pattern>" //
             + "</web-resource-collection>" //
             + "<auth-constraint>" //
             + "<role-name>testRole</role-name>" //
             + "</auth-constraint>" //
             + "</security-constraint>" //
+            + "<security-constraint>" //
+            + "<display-name>SecurityConstraint</display-name>" //
+            + "<web-resource-collection>" //
+            + "<web-resource-name>All Resources</web-resource-name>" //
+            + "<url-pattern>///webservices/greeting-secure-cdi/sub</url-pattern>" //
+            + "</web-resource-collection>" //
+            + "<auth-constraint>" //
+            + "<role-name>testRoleSub</role-name>" //
+            + "</auth-constraint>" //
+            + "</security-constraint>" //
             + "<security-role>" //
             + "<role-name>testRole</role-name>" //
+            + "<role-name>testRoleSub</role-name>" //
             + "</security-role>" //
             + "<login-config>" //
             + "<auth-method>%s</auth-method>" //

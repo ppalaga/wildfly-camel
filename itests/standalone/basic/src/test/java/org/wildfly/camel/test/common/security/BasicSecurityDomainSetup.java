@@ -22,9 +22,12 @@ import org.wildfly.camel.test.common.utils.UserManager;
 public class BasicSecurityDomainSetup implements ServerSetupTask {
     static final Path WILDFLY_HOME = Paths.get(System.getProperty("jbossHome"));
     public static final String APPLICATION_ROLE = "testRole";
+    public static final String APPLICATION_ROLE_SUB = "testRoleSub";
     public static final String SECURITY_DOMAIN = "basic-application-security-domain";
     public static final String AUTH_METHOD = "BASIC";
     public static final String APPLICATION_USER = "testUser";
+    public static final String APPLICATION_USER_SUB = "testUserSub";
+    public static final String APPLICATION_PASSWORD_SUB = "password+Sub";
     public static final String APPLICATION_PASSWORD = "password+";
 
     private static final String HTTPS_HOST = "https://localhost:8443";
@@ -46,6 +49,8 @@ public class BasicSecurityDomainSetup implements ServerSetupTask {
             um //
                     .addUser(APPLICATION_USER, APPLICATION_PASSWORD) //
                     .addRole(APPLICATION_USER, APPLICATION_ROLE) //
+                    .addUser(APPLICATION_USER_SUB, APPLICATION_PASSWORD_SUB) //
+                    .addRole(APPLICATION_USER_SUB, APPLICATION_ROLE_SUB) //
             ;
         }
 
@@ -66,6 +71,8 @@ public class BasicSecurityDomainSetup implements ServerSetupTask {
             um //
                     .removeUser(APPLICATION_USER) //
                     .removeRole(APPLICATION_USER, APPLICATION_ROLE) //
+                    .removeUser(APPLICATION_USER_SUB) //
+                    .removeRole(APPLICATION_USER_SUB, APPLICATION_ROLE_SUB) //
             ;
         }
 

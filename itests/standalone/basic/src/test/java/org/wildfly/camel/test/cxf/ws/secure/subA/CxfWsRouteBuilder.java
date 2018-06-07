@@ -41,6 +41,14 @@ public class CxfWsRouteBuilder extends RouteBuilder {
     CxfEndpoint cxfConsumerEndpoint;
 
     @Inject
+    @Named("cxfConsumerEndpointSub")
+    CxfEndpoint cxfConsumerEndpointSub;
+
+    @Inject
+    @Named("cxfProducerEndpointSub")
+    CxfEndpoint cxfProducerEndpointSub;
+
+    @Inject
     @Named("cxfProducerEndpoint")
     CxfEndpoint cxfProducerEndpoint;
 
@@ -51,5 +59,12 @@ public class CxfWsRouteBuilder extends RouteBuilder {
 
         from(this.cxfConsumerEndpoint)
         .process(this.greetingsProcessor);
+
+        from("direct:start")
+        .to(this.cxfProducerEndpointSub);
+
+        from(this.cxfConsumerEndpointSub)
+        .process(this.greetingsProcessor);
+
     }
 }

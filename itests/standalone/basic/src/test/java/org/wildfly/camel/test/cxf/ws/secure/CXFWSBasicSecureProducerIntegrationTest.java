@@ -52,24 +52,26 @@ import org.wildfly.extension.camel.CamelAware;
 @ServerSetup(BasicSecurityDomainSetup.class)
 public class CXFWSBasicSecureProducerIntegrationTest {
     static final Path WILDFLY_HOME = Paths.get(System.getProperty("jbossHome"));
+
     @Deployment
     public static Archive<?> deployment() {
-        final WebArchive archive = ShrinkWrap.create(WebArchive.class,
-                CXFWSBasicSecureProducerIntegrationTest.class.getSimpleName() + ".war") //
+        final WebArchive archive = ShrinkWrap
+                .create(WebArchive.class, CXFWSBasicSecureProducerIntegrationTest.class.getSimpleName() + ".war") //
                 .addClass(BasicSecurityDomainSetup.class);
-        SecurityUtils.enhanceArchive(archive, BasicSecurityDomainSetup.SECURITY_DOMAIN, BasicSecurityDomainSetup.AUTH_METHOD);
+        SecurityUtils.enhanceArchive(archive, BasicSecurityDomainSetup.SECURITY_DOMAIN,
+                BasicSecurityDomainSetup.AUTH_METHOD);
         return archive;
     }
 
     private static final String WS_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
     private static final String WS_MESSAGE_TEMPLATE = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">" //
-    + "<Body>" //
-    + "<greet xmlns=\"http://subA.secure.ws.cxf.test.camel.wildfly.org/\">" //
-    + "<message xmlns=\"\">%s</message>" //
-    + "<name xmlns=\"\">%s</name>" //
-    + "</greet>" //
-    + "</Body>" //
-    + "</Envelope>";
+            + "<Body>" //
+            + "<greet xmlns=\"http://subA.secure.ws.cxf.test.camel.wildfly.org/\">" //
+            + "<message xmlns=\"\">%s</message>" //
+            + "<name xmlns=\"\">%s</name>" //
+            + "</greet>" //
+            + "</Body>" //
+            + "</Envelope>";
 
     @Test
     public void greetBasic() throws Exception {
@@ -79,13 +81,11 @@ public class CXFWSBasicSecureProducerIntegrationTest {
             request.setHeader("Content-Type", "text/xml");
             request.setHeader("soapaction", "\"urn:greet\"");
 
-            String auth = BasicSecurityDomainSetup.APPLICATION_USER + ":" + BasicSecurityDomainSetup.APPLICATION_PASSWORD;
-            String authHeader = "Basic "
-                    + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1));
-            request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            basicAuth(request, BasicSecurityDomainSetup.APPLICATION_USER,
+                    BasicSecurityDomainSetup.APPLICATION_PASSWORD);
 
-            request.setEntity(new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"),
-                    StandardCharsets.UTF_8));
+            request.setEntity(
+                    new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"), StandardCharsets.UTF_8));
             try (CloseableHttpResponse response = httpclient.execute(request)) {
                 Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
@@ -96,6 +96,12 @@ public class CXFWSBasicSecureProducerIntegrationTest {
         }
     }
 
+    private void basicAuth(HttpPost request, String user, String password) {
+        String auth = user + ":" + password;
+        String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1));
+        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+    }
+
     @Test
     public void greetAnonymous() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom()
@@ -104,8 +110,8 @@ public class CXFWSBasicSecureProducerIntegrationTest {
             request.setHeader("Content-Type", "text/xml");
             request.setHeader("soapaction", "\"urn:greet\"");
 
-            request.setEntity(new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"),
-                    StandardCharsets.UTF_8));
+            request.setEntity(
+                    new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"), StandardCharsets.UTF_8));
             try (CloseableHttpResponse response = httpclient.execute(request)) {
                 Assert.assertEquals(401, response.getStatusLine().getStatusCode());
             }

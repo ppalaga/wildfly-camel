@@ -36,19 +36,35 @@ import org.slf4j.LoggerFactory;
 @Named("cxf_cdi_security_app")
 public class Application {
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
-
-    private static final String CXF_PRODUCER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
     private static final String CXF_CONSUMER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
+
+    private static final String CXF_CONSUMER_ENDPOINT_ADDRESS_SUB = "https://localhost:8443/webservices/greeting-secure-cdi/sub";
+    private static final String CXF_PRODUCER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
+    private static final String CXF_PRODUCER_ENDPOINT_ADDRESS_SUB = "https://localhost:8443/webservices/greeting-secure-cdi/sub";
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     @Inject
     @ContextName("cxfws-secure-cdi-camel-context")
     CamelContext camelContext;
 
-    @Named("greetingsProcessor")
+    @Named("cxfConsumerEndpoint")
     @Produces
-    public Processor produceGreetingsProcessor() {
-        return new GreetingsProcessor();
+    public CxfEndpoint createCxfConsumerEndpoint() {
+        CxfComponent cxfConsumerComponent = new CxfComponent(this.camelContext);
+        CxfEndpoint cxfConsumerEndpoint = new CxfEndpoint(CXF_CONSUMER_ENDPOINT_ADDRESS, cxfConsumerComponent);
+        cxfConsumerEndpoint.setBeanId("cxfConsumerEndpoint");
+        cxfConsumerEndpoint.setServiceClass(GreetingService.class);
+        return cxfConsumerEndpoint;
+    }
+
+    @Named("cxfConsumerEndpointSub")
+    @Produces
+    public CxfEndpoint createCxfConsumerEndpointSub() {
+        CxfComponent cxfConsumerComponent = new CxfComponent(this.camelContext);
+        CxfEndpoint cxfConsumerEndpoint = new CxfEndpoint(CXF_CONSUMER_ENDPOINT_ADDRESS_SUB, cxfConsumerComponent);
+        cxfConsumerEndpoint.setBeanId("cxfConsumerEndpointSub");
+        cxfConsumerEndpoint.setServiceClass(GreetingService.class);
+        return cxfConsumerEndpoint;
     }
 
     @Named("cxfProducerEndpoint")
@@ -63,7 +79,7 @@ public class Application {
         HostnameVerifier hostnameVerifier = new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
-                log.warn("=== hostname = "+ hostname);
+                log.warn("=== hostname = " + hostname);
                 return true;
             }
         };
@@ -72,14 +88,31 @@ public class Application {
         return cxfProducerEndpoint;
     }
 
-    @Named("cxfConsumerEndpoint")
+    @Named("cxfProducerEndpointSub")
     @Produces
-    public CxfEndpoint createCxfConsumerEndpoint() {
-        CxfComponent cxfConsumerComponent = new CxfComponent(this.camelContext);
-        CxfEndpoint cxfConsumerEndpoint = new CxfEndpoint(CXF_CONSUMER_ENDPOINT_ADDRESS, cxfConsumerComponent);
-        cxfConsumerEndpoint.setBeanId("cxfConsumerEndpoint");
-        cxfConsumerEndpoint.setServiceClass(GreetingService.class);
-        return cxfConsumerEndpoint;
+    public CxfEndpoint createCxfProducerEndpointSub() {
+        CxfComponent cxfProducerComponent = new CxfComponent(this.camelContext);
+        CxfEndpoint cxfProducerEndpoint = new CxfEndpoint(CXF_PRODUCER_ENDPOINT_ADDRESS_SUB, cxfProducerComponent);
+        cxfProducerEndpoint.setBeanId("cxfProducerEndpointSub");
+        cxfProducerEndpoint.setServiceClass(GreetingService.class);
+
+        // Not for use in production
+        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                log.warn("=== hostname = " + hostname);
+                return true;
+            }
+        };
+        cxfProducerEndpoint.setHostnameVerifier(hostnameVerifier);
+
+        return cxfProducerEndpoint;
+    }
+
+    @Named("greetingsProcessor")
+    @Produces
+    public Processor produceGreetingsProcessor() {
+        return new GreetingsProcessor();
     }
 
 }
