@@ -28,4 +28,3 @@ build_script:
 cache:
   - C:\Users\appveyor\.m2\wrapper
   - C:\Users\appveyor\.m2\srcdeps
-  

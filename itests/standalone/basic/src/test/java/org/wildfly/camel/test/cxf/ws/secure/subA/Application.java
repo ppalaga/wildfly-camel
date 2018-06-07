@@ -36,9 +36,8 @@ import org.slf4j.LoggerFactory;
 @Named("cxf_cdi_security_app")
 public class Application {
 
-    private static final String CXF_CONSUMER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
-
-    private static final String CXF_CONSUMER_ENDPOINT_ADDRESS_SUB = "https://localhost:8443/webservices/greeting-secure-cdi/sub";
+    public static final String CXF_CONSUMER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
+    public static final String CXF_CONSUMER_ENDPOINT_ADDRESS_SUB = "https://localhost:8443/webservices/greeting-secure-cdi/sub";
     private static final String CXF_PRODUCER_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
     private static final String CXF_PRODUCER_ENDPOINT_ADDRESS_SUB = "https://localhost:8443/webservices/greeting-secure-cdi/sub";
     private static final Logger log = LoggerFactory.getLogger(Application.class);

@@ -30,26 +30,28 @@ import org.apache.camel.component.cxf.CxfEndpoint;
 
 @ApplicationScoped
 @ContextName("cxfws-secure-cdi-camel-context")
-public class CxfWsRouteBuilder extends RouteBuilder {
+public class CxfWsRouteBuilderSub extends RouteBuilder {
 
     @Inject
     @Named("greetingsProcessor")
     Processor greetingsProcessor;
 
     @Inject
-    @Named("cxfConsumerEndpoint")
-    CxfEndpoint cxfConsumerEndpoint;
+    @Named("cxfConsumerEndpointSub")
+    CxfEndpoint cxfConsumerEndpointSub;
 
     @Inject
-    @Named("cxfProducerEndpoint")
-    CxfEndpoint cxfProducerEndpoint;
+    @Named("cxfProducerEndpointSub")
+    CxfEndpoint cxfProducerEndpointSub;
 
     @Override
     public void configure() throws Exception {
-        from("direct:start")
-        .to(this.cxfProducerEndpoint);
 
-        from(this.cxfConsumerEndpoint)
+        from("direct:start2")
+        .to(this.cxfProducerEndpointSub);
+
+        from(this.cxfConsumerEndpointSub)
         .process(this.greetingsProcessor);
+
     }
 }

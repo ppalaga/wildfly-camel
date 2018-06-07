@@ -19,9 +19,15 @@
  */
 package org.wildfly.camel.test.cxf.ws.secure;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 
 import org.apache.http.HttpEntity;
@@ -44,6 +50,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.camel.test.common.security.BasicSecurityDomainSetup;
 import org.wildfly.camel.test.common.security.SecurityUtils;
+import org.wildfly.camel.test.cxf.ws.secure.subA.Application;
 import org.wildfly.extension.camel.CamelAware;
 
 @CamelAware
@@ -52,6 +59,45 @@ import org.wildfly.extension.camel.CamelAware;
 @ServerSetup(BasicSecurityDomainSetup.class)
 public class CXFWSBasicSecureProducerIntegrationTest {
     static final Path WILDFLY_HOME = Paths.get(System.getProperty("jbossHome"));
+
+    private static final String WS_MESSAGE_TEMPLATE = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">" //
+            + "<Body>" //
+            + "<greet xmlns=\"http://subA.secure.ws.cxf.test.camel.wildfly.org/\">" //
+            + "<message xmlns=\"\">%s</message>" //
+            + "<name xmlns=\"\">%s</name>" //
+            + "</greet>" //
+            + "</Body>" //
+            + "</Envelope>";
+    private static void assertGreet(String uri, String user, String password, int responseCode, String responseBody) throws KeyManagementException,
+            UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+        try (CloseableHttpClient httpclient = HttpClients.custom()
+                .setSSLSocketFactory(SecurityUtils.createBasicSocketFactory(WILDFLY_HOME)).build()) {
+            HttpPost request = new HttpPost(uri);
+            request.setHeader("Content-Type", "text/xml");
+            request.setHeader("soapaction", "\"urn:greet\"");
+
+            if (user != null) {
+                basicAuth(request, user, password);
+            }
+
+            request.setEntity(
+                    new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"), StandardCharsets.UTF_8));
+            try (CloseableHttpResponse response = httpclient.execute(request)) {
+                Assert.assertEquals(responseCode, response.getStatusLine().getStatusCode());
+                if (responseCode == 200) {
+                    HttpEntity entity = response.getEntity();
+                    String body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
+                    Assert.assertTrue(body.contains(responseBody));
+                }
+            }
+        }
+    }
+
+    private static void basicAuth(HttpPost request, String user, String password) {
+        String auth = user + ":" + password;
+        String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1));
+        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+    }
 
     @Deployment
     public static Archive<?> deployment() {
@@ -63,58 +109,37 @@ public class CXFWSBasicSecureProducerIntegrationTest {
         return archive;
     }
 
-    private static final String WS_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
-    private static final String WS_MESSAGE_TEMPLATE = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">" //
-            + "<Body>" //
-            + "<greet xmlns=\"http://subA.secure.ws.cxf.test.camel.wildfly.org/\">" //
-            + "<message xmlns=\"\">%s</message>" //
-            + "<name xmlns=\"\">%s</name>" //
-            + "</greet>" //
-            + "</Body>" //
-            + "</Envelope>";
-
-    @Test
-    public void greetBasic() throws Exception {
-        try (CloseableHttpClient httpclient = HttpClients.custom()
-                .setSSLSocketFactory(SecurityUtils.createBasicSocketFactory(WILDFLY_HOME)).build()) {
-            HttpPost request = new HttpPost(WS_ENDPOINT_ADDRESS);
-            request.setHeader("Content-Type", "text/xml");
-            request.setHeader("soapaction", "\"urn:greet\"");
-
-            basicAuth(request, BasicSecurityDomainSetup.APPLICATION_USER,
-                    BasicSecurityDomainSetup.APPLICATION_PASSWORD);
-
-            request.setEntity(
-                    new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"), StandardCharsets.UTF_8));
-            try (CloseableHttpResponse response = httpclient.execute(request)) {
-                Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-
-                HttpEntity entity = response.getEntity();
-                String body = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-                Assert.assertTrue(body.contains("Hi Joe"));
-            }
-        }
-    }
-
-    private void basicAuth(HttpPost request, String user, String password) {
-        String auth = user + ":" + password;
-        String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1));
-        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-    }
-
     @Test
     public void greetAnonymous() throws Exception {
-        try (CloseableHttpClient httpclient = HttpClients.custom()
-                .setSSLSocketFactory(SecurityUtils.createBasicSocketFactory(WILDFLY_HOME)).build()) {
-            HttpPost request = new HttpPost(WS_ENDPOINT_ADDRESS);
-            request.setHeader("Content-Type", "text/xml");
-            request.setHeader("soapaction", "\"urn:greet\"");
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS, null, null, 401, null);
+    }
 
-            request.setEntity(
-                    new StringEntity(String.format(WS_MESSAGE_TEMPLATE, "Hi", "Joe"), StandardCharsets.UTF_8));
-            try (CloseableHttpResponse response = httpclient.execute(request)) {
-                Assert.assertEquals(401, response.getStatusLine().getStatusCode());
-            }
-        }
+    @Test
+    public void greetAnonymousSub() throws Exception {
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS_SUB, null, null, 401, null);
+    }
+
+    @Test
+    public void greetBasicGoodUser() throws Exception {
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS, BasicSecurityDomainSetup.APPLICATION_USER,
+                BasicSecurityDomainSetup.APPLICATION_PASSWORD, 200, "Hi Joe");
+    }
+
+    @Test
+    public void greetBasicBadUser() throws Exception {
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS, BasicSecurityDomainSetup.APPLICATION_USER_SUB,
+                BasicSecurityDomainSetup.APPLICATION_PASSWORD_SUB, 403, null);
+    }
+
+    @Test
+    public void greetBasicSubGoodUser() throws Exception {
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS_SUB, BasicSecurityDomainSetup.APPLICATION_USER_SUB,
+                BasicSecurityDomainSetup.APPLICATION_PASSWORD_SUB, 200, "Hi Joe");
+    }
+
+    @Test
+    public void greetBasicSubBadUser() throws Exception {
+        assertGreet(Application.CXF_CONSUMER_ENDPOINT_ADDRESS_SUB, BasicSecurityDomainSetup.APPLICATION_USER,
+                BasicSecurityDomainSetup.APPLICATION_PASSWORD, 403, null);
     }
 }

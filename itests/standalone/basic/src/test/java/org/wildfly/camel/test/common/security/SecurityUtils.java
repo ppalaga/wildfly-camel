@@ -105,10 +105,10 @@ public class SecurityUtils {
      * and vice-versa
      *
      * @param wildflyHome
-     * @throws java.io.IOException
-     *             copying of keystores fails
+     * @throws                          java.io.IOException
+     *                                      copying of keystores fails
      * @throws IllegalArgumentException
-     *             workingFolder is null or it's not a directory
+     *                                      workingFolder is null or it's not a directory
      */
     public static void copyKeyMaterial(final Path wildflyHome) throws IOException, IllegalArgumentException {
         final Path targetDirectory = wildflyHome.resolve("standalone/configuration");
@@ -132,6 +132,7 @@ public class SecurityUtils {
         return createSocketFactory(truststoreFile, null, APPLICATION_KEYSTORE_PASSWORD);
 
     }
+
     public static SSLConnectionSocketFactory createTrustedClientCertSocketFactory(final Path wildflyHome)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException,
             IOException, UnrecoverableKeyException {
@@ -140,6 +141,7 @@ public class SecurityUtils {
         return createSocketFactory(truststoreFile, keystoreFile, CLIENT_CERT_KEYSTORE_PASSWORD);
 
     }
+
     public static SSLConnectionSocketFactory createUntrustedClientCertSocketFactory(final Path wildflyHome)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException,
             IOException, UnrecoverableKeyException {
@@ -148,9 +150,10 @@ public class SecurityUtils {
         return createSocketFactory(truststoreFile, keystoreFile, CLIENT_CERT_KEYSTORE_PASSWORD);
 
     }
-    static SSLConnectionSocketFactory createSocketFactory(Path truststoreFile, Path keystoreFile,
-            String password) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException,
-            CertificateException, IOException, UnrecoverableKeyException {
+
+    static SSLConnectionSocketFactory createSocketFactory(Path truststoreFile, Path keystoreFile, String password)
+            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException,
+            IOException, UnrecoverableKeyException {
         final char[] pwd = password.toCharArray();
         SSLContextBuilder sslcontextBuilder = SSLContexts.custom()//
                 .loadTrustMaterial(truststoreFile.toFile(), pwd, TrustSelfSignedStrategy.INSTANCE)//
@@ -169,8 +172,8 @@ public class SecurityUtils {
     }
 
     public static void enhanceArchive(WebArchive archive, String securityDomain, String authMethod) {
-        archive.addClasses(WildFlyCli.class, SecurityUtils.class, CxfWsRouteBuilder.class, Application.class,
-                GreetingService.class, GreetingsProcessor.class) //
+        archive.addClasses(WildFlyCli.class, SecurityUtils.class) //
+                .addPackage(CxfWsRouteBuilder.class.getPackage()) //
                 .addAsWebInfResource(new StringAsset(String.format(JBOSS_WEB_XML_TEMPLATE, securityDomain)),
                         "jboss-web.xml")//
                 .addAsWebInfResource(new StringAsset(String.format(WEB_XML_TEMPLATE, authMethod)), "web.xml")//
