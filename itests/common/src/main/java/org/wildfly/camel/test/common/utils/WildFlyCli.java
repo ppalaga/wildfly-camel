@@ -88,7 +88,7 @@ public class WildFlyCli {
         /**
          * @return this {@link WildFlyCliResult}
          * @throws RuntimeException
-         *             in case {@link #exitValue} != 0 or {@link #stdErr} is not empty
+         *                              in case {@link #exitValue} != 0 or {@link #stdErr} is not empty
          */
         public WildFlyCliResult assertSuccess() {
             if (exitValue != 0) {
@@ -138,23 +138,17 @@ public class WildFlyCli {
      * interpreter.
      *
      * @param cliScript
-     *            the {@link Path} to the script to run
+     *                      the {@link Path} to the script to run
      * @return a WildFlyCliResult
      * @throws IOException
      * @throws InterruptedException
      */
     public WildFlyCliResult run(Path cliScript) throws IOException, InterruptedException {
         final ProcessBuilder pb = new ProcessBuilder();
-        final String[] command;
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            final String jbossCliPath = wildFlyHome.resolve("bin/jboss-cli.bat").normalize().toString();
-            command = new String[] { "cmd.exe", jbossCliPath, "--connect", "--echo-command",
-                    "--file=" + cliScript.normalize().toString() };
-        } else {
-            final String jbossCliPath = wildFlyHome.resolve("bin/jboss-cli.sh").normalize().toString();
-            command = new String[] { jbossCliPath, "--connect", "--echo-command",
-                    "--file=" + cliScript.normalize().toString() };
-        }
+        final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "sh";
+        final String jbossCliPath = wildFlyHome.resolve("bin/jboss-cli." + ext).normalize().toString();
+        final String[] command = new String[] { jbossCliPath, "--connect", "--echo-command",
+                "--file=" + cliScript.normalize().toString() };
         pb.command(command);
         Process process = pb.start();
         StreamGobbler stdOut = new StreamGobbler(process.getInputStream());
