@@ -138,7 +138,7 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      *
      * @param deploymentService the {@link CamelEndpointDeployerService}
      */
-    public void setDeploymentService(CamelEndpointDeployerService deploymentService) {
+    public void setDeploymentServiceAndDeploy(CamelEndpointDeployerService deploymentService) {
         synchronized (scheduledHandlers) {
             /* Deploy the endpoints scheduled so far */
             for (Iterator<Entry<URI, EndpointHttpHandler>> it = scheduledHandlers.entrySet().iterator(); it

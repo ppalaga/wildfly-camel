@@ -122,7 +122,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
         /*
          * Now that the injectedMainDeploymentInfo is ready, we can link this to CamelEndpointDeploymentSchedulerService
          */
-        injectedCamelEndpointDeploymentSchedulerService.getValue().setDeploymentService(this);
+        injectedCamelEndpointDeploymentSchedulerService.getValue().setDeploymentServiceAndDeploy(this);
         CamelLogger.LOGGER.warn("*** deployer started");
     }
 
