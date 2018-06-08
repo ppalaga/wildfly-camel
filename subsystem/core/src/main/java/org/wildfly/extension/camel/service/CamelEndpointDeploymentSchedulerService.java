@@ -82,7 +82,7 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
         Runtime runtime = injectedRuntime.getValue();
         registration = runtime.getModuleContext().registerService(CamelEndpointDeploymentSchedulerService.class, this,
                 null);
-        CamelLogger.LOGGER.warn("*** scheduler started");
+        CamelLogger.LOGGER.debug("{} started", CamelEndpointDeploymentSchedulerService.class.getSimpleName());
     }
 
     @Override
@@ -108,6 +108,7 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      */
     public void schedule(URI uri, EndpointHttpHandler endpointHttpHandler) {
         synchronized (scheduledHandlers) {
+            CamelLogger.LOGGER.debug("Scheduling a deployment of endpoint {}", uri);
             if (this.deployerService != null) {
                 this.deployerService.deploy(uri, endpointHttpHandler);
             } else {
@@ -125,6 +126,7 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      */
     public void unschedule(URI uri) {
         synchronized (scheduledHandlers) {
+            CamelLogger.LOGGER.debug("Unscheduling a deployment of endpoint {}", uri);
             if (this.deployerService != null) {
                 this.deployerService.undeploy(uri);
             } else {

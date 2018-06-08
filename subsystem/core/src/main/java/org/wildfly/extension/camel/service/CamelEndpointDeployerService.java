@@ -22,9 +22,6 @@ package org.wildfly.extension.camel.service;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +85,6 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
 
         @Override
         protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-            CamelLogger.LOGGER.error("*** DefaultServlet", new RuntimeException());
             endpointHttpHandler.service(getServletContext(), req, res);
         }
 
@@ -123,7 +119,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
          * Now that the injectedMainDeploymentInfo is ready, we can link this to CamelEndpointDeploymentSchedulerService
          */
         injectedCamelEndpointDeploymentSchedulerService.getValue().setDeploymentServiceAndDeploy(this);
-        CamelLogger.LOGGER.warn("*** deployer started");
+        CamelLogger.LOGGER.debug("{} started", CamelEndpointDeployerService.class.getSimpleName());
     }
 
     @Override
@@ -156,21 +152,14 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
      */
     public void deploy(URI uri, EndpointHttpHandler endpointHttpHandler) {
 
+        CamelLogger.LOGGER.debug("Deploying endpoint {}", uri);
+
         final ServletInfo servletInfo = Servlets.servlet(EndpointServlet.NAME, EndpointServlet.class).addMapping("/*")
                 .setAsyncSupported(true);
 
         final DeploymentInfo mainDeploymentInfo = injectedMainDeploymentInfo.getValue();
 
         DeploymentInfo endPointDeplyomentInfo = adaptDeploymentInfo(mainDeploymentInfo, uri, servletInfo);
-
-        try {
-            Files.write(Paths.get("/home/ppalaga/zzz/wfc-main.txt"),
-                    diToString(mainDeploymentInfo).getBytes(StandardCharsets.UTF_8));
-            Files.write(Paths.get("/home/ppalaga/zzz/wfc-e.txt"),
-                    diToString(endPointDeplyomentInfo).getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
 
         try {
             Field servletsField = DeploymentInfo.class.getDeclaredField("servlets");
@@ -218,8 +207,6 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
                         endpointResourceCollection.addUrlPattern(mainUrlPattern.substring(endpointUriPrefix.length()));
                     }
                 }
-                CamelLogger.LOGGER.warn("*** endpointResourceCollection.getUrlPatterns() = "
-                        + endpointResourceCollection.getUrlPatterns());
                 if (!endpointResourceCollection.getUrlPatterns().isEmpty()) {
                     endpointResourceCollection.addHttpMethods(mainResourceCollection.getHttpMethods());
                     endpointResourceCollection.addHttpMethodOmissions(mainResourceCollection.getHttpMethodOmissions());
@@ -227,10 +214,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
                 }
             }
 
-            CamelLogger.LOGGER.warn("*** endpointSecurityConstraint.getWebResourceCollections().size() = "
-                    + endpointSecurityConstraint.getWebResourceCollections().size());
             if (!endpointSecurityConstraint.getWebResourceCollections().isEmpty()) {
-                CamelLogger.LOGGER.warn("*** mainSecurityConstraint.getRolesAllowed() = " + mainSecurityConstraint.getRolesAllowed());
                 endpointSecurityConstraint.addRolesAllowed(mainSecurityConstraint.getRolesAllowed());
                 endpointSecurityConstraint.setEmptyRoleSemantic(mainSecurityConstraint.getEmptyRoleSemantic());
                 endpointSecurityConstraint.setTransportGuaranteeType(
@@ -450,6 +434,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
      */
     public void undeploy(URI uri) {
         synchronized (deployments) {
+            CamelLogger.LOGGER.debug("Undeploying endpoint {}", uri);
             Deployment removedDeployment = deployments.remove(uri);
             if (removedDeployment != null) {
                 injectedDefaultHost.getValue().unregisterDeployment(removedDeployment);
