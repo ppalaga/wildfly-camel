@@ -47,6 +47,7 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.camel.test.common.utils.EnvironmentUtils;
@@ -59,6 +60,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.gridfs.GridFS;
 
+@Ignore
 @CamelAware
 @RunWith(Arquillian.class)
 public class MongoDBIntegrationTest {

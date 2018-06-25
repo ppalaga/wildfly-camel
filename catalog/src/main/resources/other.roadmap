@@ -19,6 +19,8 @@ zipkin
 
 [undecided]
 aws-xray
+rxjava2
+testcontainers-spring
 
 [rejected]
 bam                                 #deprecated

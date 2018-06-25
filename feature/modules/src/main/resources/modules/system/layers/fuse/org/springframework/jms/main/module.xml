@@ -14,6 +14,7 @@
     <module name="org.springframework.beans" />
     <module name="org.springframework.context" />
     <module name="org.springframework.core" />
+    <module name="org.springframework.messaging" />
     <module name="org.springframework.tx" />
   </dependencies>
 </module>
