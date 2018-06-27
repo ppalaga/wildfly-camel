@@ -42,10 +42,6 @@ public interface CamelConstants {
     ServiceName CAMEL_CONTEXT_FACTORY_SERVICE_NAME = CAMEL_BASE_NAME.append("CamelContextFactory");
     /** The name for the {@link CamelContextRegistry} service */
     ServiceName CAMEL_CONTEXT_REGISTRY_SERVICE_NAME = CAMEL_BASE_NAME.append("CamelContextRegistry");
-    /** The name for the {@link CamelEndpointDeploymentSchedulerService} */
-    ServiceName CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_SERVICE_NAME = CAMEL_BASE_NAME.append("EndpointDeploymentScheduler");
-    /** The name for the {@link CamelEndpointDeployerService} */
-    ServiceName CAMEL_ENDPOINT_DEPLOYER_SERVICE_NAME = CAMEL_BASE_NAME.append("EndpointDeployer");
     /** The name for the {@link ContextCreateHandlerRegistry} service */
     ServiceName CONTEXT_CREATE_HANDLER_REGISTRY_SERVICE_NAME = CAMEL_BASE_NAME.append("ContextCreateHandlerRegistry");
     /** The name for the camel subsystem service */

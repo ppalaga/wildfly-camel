@@ -66,7 +66,7 @@ public class CamelEndpointDeployerProcessor implements DeploymentUnitProcessor {
         final ServiceName deploymentInfoServiceName = deploymentServiceName
                 .append(UndertowDeploymentInfoService.SERVICE_NAME);
         final ServiceName hostServiceName = UndertowService.virtualHostName(serverName, hostName);
-        CamelEndpointDeployerService.addService(phaseContext.getServiceTarget(), deploymentInfoServiceName,
+        CamelEndpointDeployerService.addService(deploymentUnit.getServiceName(), phaseContext.getServiceTarget(), deploymentInfoServiceName,
                 hostServiceName);
     }
 

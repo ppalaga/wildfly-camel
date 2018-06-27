@@ -44,6 +44,7 @@ import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.wildfly.extension.camel.CamelConstants;
 import org.wildfly.extension.camel.CamelLogger;
+import org.wildfly.extension.camel.ContextCreateHandlerRegistry;
 import org.wildfly.extension.camel.service.CamelEndpointDeploymentSchedulerService.EndpointHttpHandler;
 import org.wildfly.extension.undertow.Host;
 
@@ -100,14 +101,22 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
     private final InjectedValue<CamelEndpointDeploymentSchedulerService> injectedCamelEndpointDeploymentSchedulerService = new InjectedValue<>();
     // private org.wildfly.extension.undertow.ApplicationSecurityDomainDefinition.Registration
     // securityDomainRegistration;
+    /** The name for the {@link CamelEndpointDeployerService} */
+    private static final String SERVICE_NAME = "EndpointDeployer";
 
-    public static ServiceController<CamelEndpointDeployerService> addService(ServiceTarget serviceTarget,
-            ServiceName deploymentInfoServiceName, ServiceName hostServiceName) {
+    public static ServiceName deployerServiceName(ServiceName deploymentUnitServiceName) {
+        return deploymentUnitServiceName.append(SERVICE_NAME);
+    }
+
+    public static ServiceController<CamelEndpointDeployerService> addService(ServiceName deploymentUnitServiceName,
+            ServiceTarget serviceTarget, ServiceName deploymentInfoServiceName, ServiceName hostServiceName) {
         final CamelEndpointDeployerService service = new CamelEndpointDeployerService();
-        return serviceTarget.addService(CamelConstants.CAMEL_ENDPOINT_DEPLOYER_SERVICE_NAME, service) //
+        return serviceTarget.addService(deployerServiceName(deploymentUnitServiceName), service) //
                 .addDependency(hostServiceName, Host.class, service.injectedDefaultHost) //
                 .addDependency(deploymentInfoServiceName, DeploymentInfo.class, service.injectedMainDeploymentInfo) //
-                .addDependency(CamelConstants.CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_SERVICE_NAME,
+                .addDependency(
+                        CamelEndpointDeploymentSchedulerService.deploymentSchedulerServiceName(
+                                deploymentUnitServiceName),
                         CamelEndpointDeploymentSchedulerService.class,
                         service.injectedCamelEndpointDeploymentSchedulerService) //
                 .install();
