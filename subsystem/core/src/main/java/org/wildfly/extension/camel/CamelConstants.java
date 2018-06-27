@@ -25,6 +25,8 @@ import org.apache.camel.CamelContext;
 import org.jboss.as.server.deployment.AttachmentKey;
 import org.jboss.as.server.deployment.AttachmentList;
 import org.jboss.msc.service.ServiceName;
+import org.wildfly.extension.camel.service.CamelEndpointDeployerService;
+import org.wildfly.extension.camel.service.CamelEndpointDeploymentSchedulerService;
 
 /**
  * Camel subsystem constants.
@@ -40,6 +42,10 @@ public interface CamelConstants {
     ServiceName CAMEL_CONTEXT_FACTORY_SERVICE_NAME = CAMEL_BASE_NAME.append("CamelContextFactory");
     /** The name for the {@link CamelContextRegistry} service */
     ServiceName CAMEL_CONTEXT_REGISTRY_SERVICE_NAME = CAMEL_BASE_NAME.append("CamelContextRegistry");
+    /** The name for the {@link CamelEndpointDeploymentSchedulerService} */
+    ServiceName CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_SERVICE_NAME = CAMEL_BASE_NAME.append("EndpointDeploymentScheduler");
+    /** The name for the {@link CamelEndpointDeployerService} */
+    ServiceName CAMEL_ENDPOINT_DEPLOYER_SERVICE_NAME = CAMEL_BASE_NAME.append("EndpointDeployer");
     /** The name for the {@link ContextCreateHandlerRegistry} service */
     ServiceName CONTEXT_CREATE_HANDLER_REGISTRY_SERVICE_NAME = CAMEL_BASE_NAME.append("ContextCreateHandlerRegistry");
     /** The name for the camel subsystem service */
@@ -56,6 +62,8 @@ public interface CamelConstants {
     AttachmentKey<CamelContextFactory> CAMEL_CONTEXT_FACTORY_KEY = AttachmentKey.create(CamelContextFactory.class);
     /** The {@link ContextCreateHandlerRegistry} attachment key */
     AttachmentKey<ContextCreateHandlerRegistry> CONTEXT_CREATE_HANDLER_REGISTRY_KEY = AttachmentKey.create(ContextCreateHandlerRegistry.class);
+
+    AttachmentKey<CamelEndpointDeploymentSchedulerService> CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_REGISTRY_KEY = AttachmentKey.create(CamelEndpointDeploymentSchedulerService.class);
 
     /** The JNDI name for the {@link CamelContextFactory} binding */
     String CAMEL_CONTEXT_FACTORY_BINDING_NAME = "java:jboss/camel/CamelContextFactory";
