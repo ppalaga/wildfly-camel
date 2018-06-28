@@ -22,28 +22,38 @@ package org.apache.cxf.transport.undertow.wildfly;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.cxf.transport.undertow.AbstractHTTPServerEngine;
 import org.apache.cxf.transport.undertow.UndertowHTTPHandler;
-import org.jboss.gravia.runtime.ServiceLocator;
+import org.jboss.as.server.CurrentServiceContainer;
+import org.jboss.msc.service.ServiceController;
+import org.jboss.msc.service.ServiceName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extension.camel.service.CamelEndpointDeploymentSchedulerService;
 
 class WildflyHTTPServerEngine extends AbstractHTTPServerEngine {
     private static final Logger LOG = LoggerFactory.getLogger(WildflyHTTPServerEngine.class);
-    private final CamelEndpointDeploymentSchedulerService deploymentSchedulerService;
+
+    private final Map<URI, ServiceName> uriServiceNameMap = new HashMap<>();
 
     WildflyHTTPServerEngine(String protocol, String host, int port) {
         super(protocol, host, port);
-        deploymentSchedulerService = ServiceLocator.getRequiredService(CamelEndpointDeploymentSchedulerService.class);
     }
 
     public void addServant(URL nurl, UndertowHTTPHandler handler) {
         try {
             final URI uri = nurl.toURI();
             LOG.trace("Adding CXF servant for URI {}", uri);
+            final ServiceName serviceName = CamelEndpointDeploymentSchedulerService.deploymentSchedulerServiceName(handler.getHTTPDestination().getClassLoader());
+            ServiceController<?> serviceControler = CurrentServiceContainer.getServiceContainer().getRequiredService(serviceName);
+            CamelEndpointDeploymentSchedulerService deploymentSchedulerService = (CamelEndpointDeploymentSchedulerService) serviceControler.getValue();
             deploymentSchedulerService.schedule(uri, handler.getHTTPDestination());
+            synchronized (uriServiceNameMap) {
+                uriServiceNameMap.put(uri, serviceName);
+            }
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -53,7 +63,15 @@ class WildflyHTTPServerEngine extends AbstractHTTPServerEngine {
         try {
             final URI uri = nurl.toURI();
             LOG.trace("Removing CXF servant for URI {}", uri);
-            deploymentSchedulerService.unschedule(nurl.toURI());
+            ServiceName serviceName = null;
+            synchronized (uriServiceNameMap) {
+                serviceName = uriServiceNameMap.remove(uri);
+            }
+            if (serviceName != null) {
+                ServiceController<?> serviceControler = CurrentServiceContainer.getServiceContainer().getRequiredService(serviceName);
+                CamelEndpointDeploymentSchedulerService deploymentSchedulerService = (CamelEndpointDeploymentSchedulerService) serviceControler.getValue();
+                deploymentSchedulerService.unschedule(uri);
+            }
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

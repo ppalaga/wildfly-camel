@@ -28,6 +28,7 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.web.common.WarMetaData;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceName;
+import org.wildfly.extension.camel.CamelLogger;
 import org.wildfly.extension.camel.service.CamelEndpointDeployerService;
 import org.wildfly.extension.undertow.DeploymentDefinition;
 import org.wildfly.extension.undertow.UndertowExtension;
@@ -52,6 +53,7 @@ public class CamelEndpointDeployerProcessor implements DeploymentUnitProcessor {
         final WarMetaData warMetaData = deploymentUnit.getAttachment(WarMetaData.ATTACHMENT_KEY);
         if (warMetaData == null) {
             /* ignore non-war deployments */
+            CamelLogger.LOGGER.warn("Non-WAR: {}", deploymentUnit.getName());
             return;
         }
 
@@ -66,7 +68,7 @@ public class CamelEndpointDeployerProcessor implements DeploymentUnitProcessor {
         final ServiceName deploymentInfoServiceName = deploymentServiceName
                 .append(UndertowDeploymentInfoService.SERVICE_NAME);
         final ServiceName hostServiceName = UndertowService.virtualHostName(serverName, hostName);
-        CamelEndpointDeployerService.addService(phaseContext.getServiceTarget(), deploymentInfoServiceName,
+        CamelEndpointDeployerService.addService(deploymentUnit.getServiceName(), phaseContext.getServiceTarget(), deploymentInfoServiceName,
                 hostServiceName);
     }
 

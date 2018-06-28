@@ -45,7 +45,6 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.wildfly.camel.test.common.security.BasicSecurityDomainSetup;
 import org.wildfly.camel.test.common.security.ClientCertSecurityDomainSetup;
 import org.wildfly.camel.test.common.security.SecurityUtils;
 import org.wildfly.camel.test.cxf.ws.secure.subA.Application;
@@ -65,15 +64,13 @@ public class CXFWSClientCertSecureProducerIntegrationTest {
         {
             try {
                 put(new URI(Application.CXF_CONSUMER_ENDPOINT_ADDRESS).getPath(),
-                        BasicSecurityDomainSetup.APPLICATION_ROLE);
+                        ClientCertSecurityDomainSetup.APPLICATION_ROLE);
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
         }
     };
     static final Path WILDFLY_HOME = Paths.get(System.getProperty("jbossHome"));
-
-    private static final String WS_ENDPOINT_ADDRESS = "https://localhost:8443/webservices/greeting-secure-cdi";
 
     private static final String WS_MESSAGE_TEMPLATE = "<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">" //
             + "<Body>" //
@@ -100,7 +97,7 @@ public class CXFWSClientCertSecureProducerIntegrationTest {
     public void greetAnonymous() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom()
                 .setSSLSocketFactory(SecurityUtils.createUntrustedClientCertSocketFactory(WILDFLY_HOME)).build()) {
-            HttpPost request = new HttpPost(WS_ENDPOINT_ADDRESS);
+            HttpPost request = new HttpPost(Application.CXF_CONSUMER_ENDPOINT_ADDRESS);
             request.setHeader("Content-Type", "text/xml");
             request.setHeader("soapaction", "\"urn:greet\"");
 
@@ -116,7 +113,7 @@ public class CXFWSClientCertSecureProducerIntegrationTest {
     public void greetClientCert() throws Exception {
         try (CloseableHttpClient httpclient = HttpClients.custom()
                 .setSSLSocketFactory(SecurityUtils.createTrustedClientCertSocketFactory(WILDFLY_HOME)).build()) {
-            HttpPost request = new HttpPost(WS_ENDPOINT_ADDRESS);
+            HttpPost request = new HttpPost(Application.CXF_CONSUMER_ENDPOINT_ADDRESS);
             request.setHeader("Content-Type", "text/xml");
             request.setHeader("soapaction", "\"urn:greet\"");
 

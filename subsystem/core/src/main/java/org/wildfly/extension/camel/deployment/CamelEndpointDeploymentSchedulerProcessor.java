@@ -44,7 +44,7 @@ public class CamelEndpointDeploymentSchedulerProcessor implements DeploymentUnit
             return;
         }
         final ServiceTarget serviceTarget = phaseContext.getServiceTarget();
-        final ServiceController<CamelEndpointDeploymentSchedulerService> serviceController = CamelEndpointDeploymentSchedulerService.addService(serviceTarget);
+        final ServiceController<CamelEndpointDeploymentSchedulerService> serviceController = CamelEndpointDeploymentSchedulerService.addService(deploymentUnit.getServiceName(), deploymentUnit.getName(), serviceTarget);
         phaseContext.addDeploymentDependency(serviceController.getName(), CamelConstants.CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_REGISTRY_KEY);
     }
 
