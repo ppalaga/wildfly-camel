@@ -131,6 +131,12 @@ public class UndertowHTTPDestination extends ServletDestination implements Endpo
         super.activate();
         LOG.debug("Activating receipt of incoming messages");
 
+        LOG.warn("--- ei = "+ endpointInfo.hashCode());
+        LOG.warn("--- ei = "+ endpointInfo);
+        Class<?> serviceClass = endpointInfo.getProperty("serviceClass", Class.class);
+        LOG.warn("--- serviceClass = "+ endpointInfo.getProperty("serviceClass"));
+        LOG.warn("--- serviceClass.cl = "+ serviceClass.getClassLoader());
+
         if (engine != null) {
             UndertowHTTPHandler jhd = createJettyHTTPHandler(this, contextMatchOnExact());
             engine.addServant(nurl, jhd);

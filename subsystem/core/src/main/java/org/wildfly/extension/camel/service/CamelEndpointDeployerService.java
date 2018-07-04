@@ -20,7 +20,6 @@
 package org.wildfly.extension.camel.service;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,24 +27,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.msc.service.Service;
+import org.jboss.as.server.deployment.Attachments;
+import org.jboss.as.server.deployment.DeploymentUnit;
+import org.jboss.metadata.javaee.jboss.RunAsIdentityMetaData;
+import org.jboss.msc.Service;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.jboss.msc.value.InjectedValue;
-import org.wildfly.extension.camel.CamelConstants;
 import org.wildfly.extension.camel.CamelLogger;
-import org.wildfly.extension.camel.ContextCreateHandlerRegistry;
 import org.wildfly.extension.camel.service.CamelEndpointDeploymentSchedulerService.EndpointHttpHandler;
+import org.wildfly.extension.undertow.ApplicationSecurityDomainDefinition.Registration;
+import org.wildfly.extension.undertow.Capabilities;
 import org.wildfly.extension.undertow.Host;
 
 import io.undertow.security.api.AuthenticationMechanismFactory;
@@ -73,10 +78,7 @@ import io.undertow.servlet.core.ManagedServlet;
  *
  * @author <a href="https://github.com/ppalaga">Peter Palaga</a>
  */
-public class CamelEndpointDeployerService implements Service<CamelEndpointDeployerService> {
-
-    private static final String CATCH_ALL_ENDPOINT_URI_PREFIX = "///*";
-    private static final String CATCH_ALL_PREFIX = "/*";
+public class CamelEndpointDeployerService implements Service {
 
     @SuppressWarnings("serial")
     static class EndpointServlet extends HttpServlet {
@@ -94,132 +96,12 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
         }
 
     }
+    private static final String CATCH_ALL_ENDPOINT_URI_PREFIX = "///*";
 
-    private final Map<URI, Deployment> deployments = new HashMap<>();
-    private final InjectedValue<Host> injectedDefaultHost = new InjectedValue<>();
-    private final InjectedValue<DeploymentInfo> injectedMainDeploymentInfo = new InjectedValue<>();
-    private final InjectedValue<CamelEndpointDeploymentSchedulerService> injectedCamelEndpointDeploymentSchedulerService = new InjectedValue<>();
-    // private org.wildfly.extension.undertow.ApplicationSecurityDomainDefinition.Registration
-    // securityDomainRegistration;
+    private static final String CATCH_ALL_PREFIX = "/*";
+
     /** The name for the {@link CamelEndpointDeployerService} */
     private static final String SERVICE_NAME = "EndpointDeployer";
-
-    public static ServiceName deployerServiceName(ServiceName deploymentUnitServiceName) {
-        return deploymentUnitServiceName.append(SERVICE_NAME);
-    }
-
-    public static ServiceController<CamelEndpointDeployerService> addService(ServiceName deploymentUnitServiceName,
-            ServiceTarget serviceTarget, ServiceName deploymentInfoServiceName, ServiceName hostServiceName) {
-        final CamelEndpointDeployerService service = new CamelEndpointDeployerService();
-        return serviceTarget.addService(deployerServiceName(deploymentUnitServiceName), service) //
-                .addDependency(hostServiceName, Host.class, service.injectedDefaultHost) //
-                .addDependency(deploymentInfoServiceName, DeploymentInfo.class, service.injectedMainDeploymentInfo) //
-                .addDependency(
-                        CamelEndpointDeploymentSchedulerService.deploymentSchedulerServiceName(
-                                deploymentUnitServiceName),
-                        CamelEndpointDeploymentSchedulerService.class,
-                        service.injectedCamelEndpointDeploymentSchedulerService) //
-                .install();
-    }
-
-    @Override
-    public void start(StartContext context) throws StartException {
-        /*
-         * Now that the injectedMainDeploymentInfo is ready, we can link this to CamelEndpointDeploymentSchedulerService
-         */
-        injectedCamelEndpointDeploymentSchedulerService.getValue().setDeploymentServiceAndDeploy(this);
-        CamelLogger.LOGGER.warn("{} started", CamelEndpointDeployerService.class.getSimpleName());
-    }
-
-    @Override
-    public void stop(StopContext context) {
-    }
-
-    @Override
-    public CamelEndpointDeployerService getValue() throws IllegalStateException {
-        return this;
-    }
-
-    static io.undertow.servlet.api.TransportGuaranteeType transportGuaranteeType(URI uri,
-            final TransportGuaranteeType transportGuaranteeType) {
-        if (uri.getScheme().equals("https")) {
-            return io.undertow.servlet.api.TransportGuaranteeType.CONFIDENTIAL;
-        } else if (transportGuaranteeType != null) {
-            return transportGuaranteeType;
-        } else {
-            return io.undertow.servlet.api.TransportGuaranteeType.NONE;
-        }
-    }
-
-    /**
-     * Exposes a HTTP endpoint defined by the given {@link EndpointHttpHandler} under the given {@link URI}'s path.
-     *
-     * @param uri
-     *                                determines the path and protocol under which the HTTP endpoint should be exposed
-     * @param endpointHttpHandler
-     *                                an {@link EndpointHttpHandler} to use for handling HTTP requests sent to the given
-     *                                {@link URI}'s path
-     */
-    public void deploy(URI uri, EndpointHttpHandler endpointHttpHandler) {
-
-        final ServletInfo servletInfo = Servlets.servlet(EndpointServlet.NAME, EndpointServlet.class).addMapping("/*")
-                .setAsyncSupported(true);
-
-        final DeploymentInfo mainDeploymentInfo = injectedMainDeploymentInfo.getValue();
-
-        DeploymentInfo endPointDeplyomentInfo = adaptDeploymentInfo(mainDeploymentInfo, uri, servletInfo);
-        CamelLogger.LOGGER.warn("Deploying endpoint {}", endPointDeplyomentInfo.getDeploymentName());
-
-        final DeploymentManager manager = Servlets.defaultContainer().addDeployment(endPointDeplyomentInfo);
-        manager.deploy();
-        final Deployment deployment = manager.getDeployment();
-        try {
-            HttpHandler servletHandler = manager.start();
-            injectedDefaultHost.getValue().registerDeployment(deployment, servletHandler);
-
-            ManagedServlet managedServlet = deployment.getServlets().getManagedServlet(EndpointServlet.NAME);
-
-            EndpointServlet servletInstance = (EndpointServlet) managedServlet.getServlet().getInstance();
-            servletInstance.setEndpointHttpHandler(endpointHttpHandler);
-        } catch (ServletException ex) {
-            throw new IllegalStateException(ex);
-        }
-        synchronized (deployments) {
-            deployments.put(uri, deployment);
-        }
-    }
-
-    static List<SecurityConstraint> filterConstraints(DeploymentInfo mainDeploymentInfo, URI uri) {
-        final List<SecurityConstraint> result = new ArrayList<>();
-        final String endpointUriPrefix = "//" + uri.getPath();
-        for (SecurityConstraint mainSecurityConstraint : mainDeploymentInfo.getSecurityConstraints()) {
-            final SecurityConstraint endpointSecurityConstraint = new SecurityConstraint();
-            for (WebResourceCollection mainResourceCollection : mainSecurityConstraint.getWebResourceCollections()) {
-                final WebResourceCollection endpointResourceCollection = new WebResourceCollection();
-                for (String mainUrlPattern : mainResourceCollection.getUrlPatterns()) {
-                    if (CATCH_ALL_ENDPOINT_URI_PREFIX.equals(mainUrlPattern)) {
-                        endpointResourceCollection.addUrlPattern(CATCH_ALL_PREFIX);
-                    } else if (mainUrlPattern.startsWith(endpointUriPrefix)) {
-                        endpointResourceCollection.addUrlPattern(mainUrlPattern.substring(endpointUriPrefix.length()));
-                    }
-                }
-                if (!endpointResourceCollection.getUrlPatterns().isEmpty()) {
-                    endpointResourceCollection.addHttpMethods(mainResourceCollection.getHttpMethods());
-                    endpointResourceCollection.addHttpMethodOmissions(mainResourceCollection.getHttpMethodOmissions());
-                    endpointSecurityConstraint.addWebResourceCollection(endpointResourceCollection);
-                }
-            }
-
-            if (!endpointSecurityConstraint.getWebResourceCollections().isEmpty()) {
-                endpointSecurityConstraint.addRolesAllowed(mainSecurityConstraint.getRolesAllowed());
-                endpointSecurityConstraint.setEmptyRoleSemantic(mainSecurityConstraint.getEmptyRoleSemantic());
-                endpointSecurityConstraint.setTransportGuaranteeType(
-                        transportGuaranteeType(uri, mainSecurityConstraint.getTransportGuaranteeType()));
-                result.add(endpointSecurityConstraint);
-            }
-        }
-        return result;
-    }
 
     /**
      * This method can simplified substantially, once https://github.com/undertow-io/undertow/pull/642 reaches us.
@@ -364,6 +246,152 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
         return info;
     }
 
+    public static ServiceController<CamelEndpointDeployerService> addService(DeploymentUnit deploymentUnit,
+            ServiceTarget serviceTarget, ServiceName deploymentInfoServiceName, ServiceName hostServiceName) {
+
+        @SuppressWarnings("unchecked")
+        ServiceBuilder<CamelEndpointDeployerService> sb = (ServiceBuilder<CamelEndpointDeployerService>) serviceTarget
+                .addService(deployerServiceName(deploymentUnit.getServiceName())) //
+        ;
+        final Supplier<Host> hostSupplier = sb.requires(hostServiceName);
+        final Supplier<DeploymentInfo> deploymentInfoSupplier = sb.requires(deploymentInfoServiceName);
+        final Supplier<CamelEndpointDeploymentSchedulerService> deploymentSchedulerServiceSupplier = sb
+                .requires(CamelEndpointDeploymentSchedulerService
+                        .deploymentSchedulerServiceName(deploymentUnit.getServiceName()));
+
+        final DeploymentUnit parent = deploymentUnit.getParent();
+        final Supplier<CamelEndpointDeploymentSchedulerService> parentDeploymentSchedulerServiceSupplier = parent == null
+                ? null
+                : sb.requires(CamelEndpointDeploymentSchedulerService
+                        .deploymentSchedulerServiceName(parent.getServiceName()));
+
+        final CamelEndpointDeployerService service = new CamelEndpointDeployerService(hostSupplier,
+                deploymentInfoSupplier, deploymentSchedulerServiceSupplier, parentDeploymentSchedulerServiceSupplier);
+        return sb.setInstance(service).install();
+    }
+
+    public static ServiceName deployerServiceName(ServiceName deploymentUnitServiceName) {
+        return deploymentUnitServiceName.append(SERVICE_NAME);
+    }
+
+    static List<SecurityConstraint> filterConstraints(DeploymentInfo mainDeploymentInfo, URI uri) {
+        final List<SecurityConstraint> result = new ArrayList<>();
+        final String endpointUriPrefix = "//" + uri.getPath();
+        for (SecurityConstraint mainSecurityConstraint : mainDeploymentInfo.getSecurityConstraints()) {
+            final SecurityConstraint endpointSecurityConstraint = new SecurityConstraint();
+            for (WebResourceCollection mainResourceCollection : mainSecurityConstraint.getWebResourceCollections()) {
+                final WebResourceCollection endpointResourceCollection = new WebResourceCollection();
+                for (String mainUrlPattern : mainResourceCollection.getUrlPatterns()) {
+                    if (CATCH_ALL_ENDPOINT_URI_PREFIX.equals(mainUrlPattern)) {
+                        endpointResourceCollection.addUrlPattern(CATCH_ALL_PREFIX);
+                    } else if (mainUrlPattern.startsWith(endpointUriPrefix)) {
+                        endpointResourceCollection.addUrlPattern(mainUrlPattern.substring(endpointUriPrefix.length()));
+                    }
+                }
+                if (!endpointResourceCollection.getUrlPatterns().isEmpty()) {
+                    endpointResourceCollection.addHttpMethods(mainResourceCollection.getHttpMethods());
+                    endpointResourceCollection.addHttpMethodOmissions(mainResourceCollection.getHttpMethodOmissions());
+                    endpointSecurityConstraint.addWebResourceCollection(endpointResourceCollection);
+                }
+            }
+
+            if (!endpointSecurityConstraint.getWebResourceCollections().isEmpty()) {
+                endpointSecurityConstraint.addRolesAllowed(mainSecurityConstraint.getRolesAllowed());
+                endpointSecurityConstraint.setEmptyRoleSemantic(mainSecurityConstraint.getEmptyRoleSemantic());
+                endpointSecurityConstraint.setTransportGuaranteeType(
+                        transportGuaranteeType(uri, mainSecurityConstraint.getTransportGuaranteeType()));
+                result.add(endpointSecurityConstraint);
+            }
+        }
+        return result;
+    }
+
+    static io.undertow.servlet.api.TransportGuaranteeType transportGuaranteeType(URI uri,
+            final TransportGuaranteeType transportGuaranteeType) {
+        if (uri.getScheme().equals("https")) {
+            return io.undertow.servlet.api.TransportGuaranteeType.CONFIDENTIAL;
+        } else if (transportGuaranteeType != null) {
+            return transportGuaranteeType;
+        } else {
+            return io.undertow.servlet.api.TransportGuaranteeType.NONE;
+        }
+    }
+
+    private final Supplier<DeploymentInfo> deploymentInfoSupplier;
+
+    private final Map<URI, Deployment> deployments = new HashMap<>();
+
+    private final Supplier<CamelEndpointDeploymentSchedulerService> deploymentSchedulerServiceSupplier;
+
+    private final Supplier<Host> hostSupplier;
+
+    private final Supplier<CamelEndpointDeploymentSchedulerService> parentDeploymentSchedulerServiceSupplier;
+
+    public CamelEndpointDeployerService(Supplier<Host> hostSupplier, Supplier<DeploymentInfo> deploymentInfoSupplier,
+            Supplier<CamelEndpointDeploymentSchedulerService> deploymentSchedulerServiceSupplier,
+            Supplier<CamelEndpointDeploymentSchedulerService> parentDeploymentSchedulerServiceSupplier) {
+        this.hostSupplier = hostSupplier;
+        this.deploymentInfoSupplier = deploymentInfoSupplier;
+        this.deploymentSchedulerServiceSupplier = deploymentSchedulerServiceSupplier;
+        this.parentDeploymentSchedulerServiceSupplier = parentDeploymentSchedulerServiceSupplier;
+    }
+
+    /**
+     * Exposes a HTTP endpoint defined by the given {@link EndpointHttpHandler} under the given {@link URI}'s path.
+     *
+     * @param uri
+     *                                determines the path and protocol under which the HTTP endpoint should be exposed
+     * @param endpointHttpHandler
+     *                                an {@link EndpointHttpHandler} to use for handling HTTP requests sent to the given
+     *                                {@link URI}'s path
+     */
+    public void deploy(URI uri, EndpointHttpHandler endpointHttpHandler) {
+
+        final ServletInfo servletInfo = Servlets.servlet(EndpointServlet.NAME, EndpointServlet.class).addMapping("/*")
+                .setAsyncSupported(true);
+
+        final DeploymentInfo mainDeploymentInfo = deploymentInfoSupplier.get();
+
+        DeploymentInfo endPointDeplyomentInfo = adaptDeploymentInfo(mainDeploymentInfo, uri, servletInfo);
+        CamelLogger.LOGGER.warn("Deploying endpoint {}", endPointDeplyomentInfo.getDeploymentName());
+
+        final DeploymentManager manager = Servlets.defaultContainer().addDeployment(endPointDeplyomentInfo);
+        manager.deploy();
+        final Deployment deployment = manager.getDeployment();
+        try {
+            HttpHandler servletHandler = manager.start();
+            hostSupplier.get().registerDeployment(deployment, servletHandler);
+
+            ManagedServlet managedServlet = deployment.getServlets().getManagedServlet(EndpointServlet.NAME);
+
+            EndpointServlet servletInstance = (EndpointServlet) managedServlet.getServlet().getInstance();
+            servletInstance.setEndpointHttpHandler(endpointHttpHandler);
+        } catch (ServletException ex) {
+            throw new IllegalStateException(ex);
+        }
+        synchronized (deployments) {
+            deployments.put(uri, deployment);
+        }
+    }
+
+    @Override
+    public void start(StartContext context) throws StartException {
+        /*
+         * Now that the injectedMainDeploymentInfo is ready, we can link this to CamelEndpointDeploymentSchedulerService
+         */
+        final DeploymentInfo mainDeploymentInfo = deploymentInfoSupplier.get();
+        final String contextPath = mainDeploymentInfo.getContextPath();
+        deploymentSchedulerServiceSupplier.get().registerDeployer(contextPath, this);
+        if (parentDeploymentSchedulerServiceSupplier != null) {
+            parentDeploymentSchedulerServiceSupplier.get().registerDeployer(contextPath, this);
+        }
+        CamelLogger.LOGGER.warn("{} started", CamelEndpointDeployerService.class.getSimpleName());
+    }
+
+    @Override
+    public void stop(StopContext context) {
+    }
+
     /**
      * Unexpose the endpoint available under the given {@link URI}'s path.
      *
@@ -374,8 +402,9 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
         synchronized (deployments) {
             Deployment removedDeployment = deployments.remove(uri);
             if (removedDeployment != null) {
-                CamelLogger.LOGGER.warn("Undeploying endpoint {}", removedDeployment.getDeploymentInfo().getDeploymentName());
-                injectedDefaultHost.getValue().unregisterDeployment(removedDeployment);
+                CamelLogger.LOGGER.warn("Undeploying endpoint {}",
+                        removedDeployment.getDeploymentInfo().getDeploymentName());
+                hostSupplier.get().unregisterDeployment(removedDeployment);
             }
         }
     }

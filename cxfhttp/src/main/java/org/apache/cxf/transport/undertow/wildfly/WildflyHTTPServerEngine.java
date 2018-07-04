@@ -47,6 +47,7 @@ class WildflyHTTPServerEngine extends AbstractHTTPServerEngine {
         try {
             final URI uri = nurl.toURI();
             LOG.trace("Adding CXF servant for URI {}", uri);
+            LOG.error("Adding CXF servant for URI", new RuntimeException());
             final ServiceName serviceName = CamelEndpointDeploymentSchedulerService.deploymentSchedulerServiceName(handler.getHTTPDestination().getClassLoader());
             ServiceController<?> serviceControler = CurrentServiceContainer.getServiceContainer().getRequiredService(serviceName);
             CamelEndpointDeploymentSchedulerService deploymentSchedulerService = (CamelEndpointDeploymentSchedulerService) serviceControler.getValue();

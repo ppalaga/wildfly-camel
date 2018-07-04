@@ -19,6 +19,8 @@
  */
 package org.wildfly.extension.camel.deployment;
 
+import java.util.List;
+
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
@@ -43,8 +45,10 @@ public class CamelEndpointDeploymentSchedulerProcessor implements DeploymentUnit
         if (!depSettings.isEnabled()) {
             return;
         }
+        List<DeploymentUnit> subDeployments = deploymentUnit.getAttachmentList(org.jboss.as.server.deployment.Attachments.SUB_DEPLOYMENTS);
+
         final ServiceTarget serviceTarget = phaseContext.getServiceTarget();
-        final ServiceController<CamelEndpointDeploymentSchedulerService> serviceController = CamelEndpointDeploymentSchedulerService.addService(deploymentUnit.getServiceName(), deploymentUnit.getName(), serviceTarget);
+        final ServiceController<CamelEndpointDeploymentSchedulerService> serviceController = CamelEndpointDeploymentSchedulerService.addService(deploymentUnit.getServiceName(), deploymentUnit.getName(), subDeployments.size(), serviceTarget);
         phaseContext.addDeploymentDependency(serviceController.getName(), CamelConstants.CAMEL_ENDPOINT_DEPLOYMENT_SCHEDULER_REGISTRY_KEY);
     }
 

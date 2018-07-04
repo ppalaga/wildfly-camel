@@ -27,6 +27,8 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.web.common.WarMetaData;
 import org.jboss.dmr.ModelNode;
+import org.jboss.metadata.ear.jboss.JBossAppMetaData;
+import org.jboss.metadata.ear.spec.EarMetaData;
 import org.jboss.msc.service.ServiceName;
 import org.wildfly.extension.camel.CamelLogger;
 import org.wildfly.extension.camel.service.CamelEndpointDeployerService;
@@ -68,8 +70,25 @@ public class CamelEndpointDeployerProcessor implements DeploymentUnitProcessor {
         final ServiceName deploymentInfoServiceName = deploymentServiceName
                 .append(UndertowDeploymentInfoService.SERVICE_NAME);
         final ServiceName hostServiceName = UndertowService.virtualHostName(serverName, hostName);
-        CamelEndpointDeployerService.addService(deploymentUnit.getServiceName(), phaseContext.getServiceTarget(), deploymentInfoServiceName,
-                hostServiceName);
+
+        CamelEndpointDeployerService.addService(deploymentUnit, phaseContext.getServiceTarget(),
+                deploymentInfoServiceName, hostServiceName);
+    }
+
+
+    /**
+     * Try to obtain the security domain configured in jboss-app.xml at the ear level if available
+     */
+    private String getJBossAppSecurityDomain(final DeploymentUnit deploymentUnit) {
+        String securityDomain = null;
+        DeploymentUnit parent = deploymentUnit.getParent();
+        if (parent != null) {
+            final EarMetaData jbossAppMetaData = parent.getAttachment(org.jboss.as.ee.structure.Attachments.EAR_METADATA);
+            if (jbossAppMetaData instanceof JBossAppMetaData) {
+                securityDomain = ((JBossAppMetaData) jbossAppMetaData).getSecurityDomain();
+            }
+        }
+        return securityDomain != null ? securityDomain.trim() : null;
     }
 
     @Override

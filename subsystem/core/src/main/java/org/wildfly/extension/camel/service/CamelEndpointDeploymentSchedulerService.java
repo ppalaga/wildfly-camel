@@ -21,10 +21,13 @@ package org.wildfly.extension.camel.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +53,38 @@ import org.wildfly.extension.camel.CamelLogger;
  */
 public class CamelEndpointDeploymentSchedulerService implements Service<CamelEndpointDeploymentSchedulerService> {
 
+    static class ContextPath implements Comparable<ContextPath> {
+        private final String source;
+        private final String[] segments;
+
+        public ContextPath(String contextPath) {
+            this.source = contextPath;
+            this.segments = contextPath.split("/");
+        }
+
+        /** {@link ContextPath}s with more segments go first, then alphabetically per segment */
+        @Override
+        public int compareTo(ContextPath other) {
+            if (this.source.equals(other.source)) {
+                return 0;
+            } else if (this.segments.length > other.segments.length) {
+                return -1;
+            } else if (this.segments.length < other.segments.length) {
+                return -1;
+            } else {
+                /* equal number of segments */
+                for (int i = 0; i < this.segments.length; i++) {
+                    final int comp = this.segments[i].compareTo(other.segments[i]);
+                    if (comp != 0) {
+                        return comp;
+                    }
+                }
+                return 0;
+            }
+        }
+
+    }
+
     public interface EndpointHttpHandler {
         ClassLoader getClassLoader();
 
@@ -60,9 +95,9 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
     private static final String SERVICE_NAME = "EndpointDeploymentScheduler";
 
     public static ServiceController<CamelEndpointDeploymentSchedulerService> addService(
-            ServiceName deploymentUnitServiceName, String deploymentName, ServiceTarget serviceTarget) {
+            ServiceName deploymentUnitServiceName, String deploymentName, int subDeploymentsCount, ServiceTarget serviceTarget) {
         CamelLogger.LOGGER.warn("deploymentUnitServiceName of {} = {}", deploymentName, deploymentUnitServiceName);
-        final CamelEndpointDeploymentSchedulerService service = new CamelEndpointDeploymentSchedulerService(deploymentName);
+        final CamelEndpointDeploymentSchedulerService service = new CamelEndpointDeploymentSchedulerService(deploymentName, subDeploymentsCount);
         return serviceTarget.addService(deploymentSchedulerServiceName(deploymentUnitServiceName), service) //
                 .install();
     }
@@ -88,15 +123,20 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
     public static ServiceName deploymentSchedulerServiceName(ServiceName deploymentUnitServiceName) {
         return deploymentUnitServiceName.append(SERVICE_NAME);
     }
-    private volatile CamelEndpointDeployerService deployerService;
-
     private final String deploymentName;
 
-    private final Map<URI, EndpointHttpHandler> scheduledHandlers = new HashMap<>();
+    private final Map<URI, EndpointHttpHandler> scheduledHandlers = new LinkedHashMap<>();
+    private final Map<ContextPath, CamelEndpointDeployerService> deployers = new TreeMap<>();
 
-    CamelEndpointDeploymentSchedulerService(String deploymentName) {
+    private final int subDeploymentsCount;
+
+    /** Used to lock both {@link #deployers} an {@link #scheduledHandlers} */
+    private final Object lock = new Object();
+
+    CamelEndpointDeploymentSchedulerService(String deploymentName, int subDeploymentsCount) {
         super();
         this.deploymentName = deploymentName;
+        this.subDeploymentsCount = subDeploymentsCount;
     }
 
     @Override
@@ -115,11 +155,14 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      *                                {@link URI}'s path
      */
     public void schedule(URI uri, EndpointHttpHandler endpointHttpHandler) {
-        synchronized (scheduledHandlers) {
+        synchronized (lock) {
             CamelLogger.LOGGER.warn("Scheduling a deployment of endpoint {} from {}", uri, deploymentName);
-            if (this.deployerService != null) {
-                this.deployerService.deploy(uri, endpointHttpHandler);
+            if (deployers.size() >= subDeploymentsCount) {
+                /* Deploy immediately */
+                final CamelEndpointDeployerService matchingDeploymentService = findDeployer(uri);
+                matchingDeploymentService.deploy(uri, endpointHttpHandler);
             } else {
+                /* Schedule the deployment */
                 scheduledHandlers.put(uri, endpointHttpHandler);
             }
         }
@@ -131,16 +174,20 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      * @param deploymentService
      *                              the {@link CamelEndpointDeployerService}
      */
-    public void setDeploymentServiceAndDeploy(CamelEndpointDeployerService deploymentService) {
-        synchronized (scheduledHandlers) {
-            /* Deploy the endpoints scheduled so far */
-            for (Iterator<Entry<URI, EndpointHttpHandler>> it = scheduledHandlers.entrySet().iterator(); it
-                    .hasNext();) {
-                Entry<URI, EndpointHttpHandler> en = it.next();
-                deploymentService.deploy(en.getKey(), en.getValue());
-                it.remove();
+    public void registerDeployer(String contextPath, CamelEndpointDeployerService registeringDeploymentService) {
+        synchronized (lock) {
+            deployers.put(new ContextPath(contextPath), registeringDeploymentService);
+            if (deployers.size() >= subDeploymentsCount) {
+                /* Deploy the endpoints scheduled so far */
+                for (Iterator<Entry<URI, EndpointHttpHandler>> it = scheduledHandlers.entrySet().iterator(); it
+                        .hasNext();) {
+                    final Entry<URI, EndpointHttpHandler> en = it.next();
+                    final URI uri = en.getKey();
+                    final CamelEndpointDeployerService matchingDeploymentService = findDeployer(uri);
+                    matchingDeploymentService.deploy(uri, en.getValue());
+                    it.remove();
+                }
             }
-            this.deployerService = deploymentService;
         }
     }
 
@@ -161,12 +208,31 @@ public class CamelEndpointDeploymentSchedulerService implements Service<CamelEnd
      *                determines the path and protocol under which the HTTP endpoint should be exposed
      */
     public void unschedule(URI uri) {
-        synchronized (scheduledHandlers) {
+        synchronized (lock) {
             CamelLogger.LOGGER.warn("Unscheduling a deployment of endpoint {} from {}", uri, deploymentName);
-            if (this.deployerService != null) {
-                this.deployerService.undeploy(uri);
+            final CamelEndpointDeployerService deploymentService = findDeployer(uri);
+            if (deploymentService != null) {
+                deploymentService.undeploy(uri);
+            }
+            scheduledHandlers.remove(uri);
+        }
+    }
+
+    private CamelEndpointDeployerService findDeployer(URI uri) {
+        synchronized (lock) {
+            if (deployers.size() == 1) {
+                return deployers.values().iterator().next();
             } else {
-                scheduledHandlers.remove(uri);
+                String path = uri.getPath();
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                for (Entry<ContextPath, CamelEndpointDeployerService> en : deployers.entrySet()) {
+                    if (en.getKey().source.startsWith(path)) {
+                        return en.getValue();
+                    }
+                }
+                return null;
             }
         }
     }
