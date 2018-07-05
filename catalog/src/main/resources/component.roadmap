@@ -130,6 +130,8 @@ kafka
 kubernetes                                          #deprecated
 kubernetes-config-maps
 kubernetes-deployments
+kubernetes-hpa
+kubernetes-job
 kubernetes-namespaces
 kubernetes-nodes
 kubernetes-persistent-volumes
@@ -155,7 +157,7 @@ milo-server
 mina2
 mllp
 mock
-mongodb
+mongodb                                             #deprecated
 mongodb-gridfs
 mongodb3
 mqtt
