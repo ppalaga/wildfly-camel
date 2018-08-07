@@ -87,7 +87,7 @@
         </testResources>
         <pluginManagement>
             <plugins>
-                <plugin>
+                <!-- <plugin>
                     <groupId>org.wildfly.build</groupId>
                     <artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
                     <executions>
@@ -103,7 +103,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin> -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>

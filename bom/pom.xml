@@ -409,6 +409,12 @@
                 <version>${version.fusepatch}</version>
                 <type>zip</type>
             </dependency>
+            <dependency>
+                <groupId>org.wildfly.extras.patch</groupId>
+                <artifactId>fuse-patch-galleon-pack</artifactId>
+                <version>${version.fusepatch}</version>
+                <type>zip</type>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
