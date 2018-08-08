@@ -41,6 +41,7 @@
         <module>extrasB</module>
         <module>extrasC</module>
         <module>pack</module>
+        <module>galleon-pack</module>
     </modules>
 
     <build>

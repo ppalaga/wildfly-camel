@@ -43,6 +43,11 @@
     <!-- Dependencies -->
     <dependencies>
         <dependency>
+            <groupId>org.wildfly.extras.patch</groupId>
+            <artifactId>fuse-patch-galleon-pack</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
             <groupId>org.wildfly.camel</groupId>
             <artifactId>wildfly-camel-itests-common</artifactId>
             <version>${project.version}</version>
@@ -88,6 +93,35 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.jboss.galleon</groupId>
+                    <artifactId>galleon-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>server-provisioning</id>
+                            <goals>
+                                <goal>provision</goal>
+                            </goals>
+                            <phase>generate-test-resources</phase>
+                            <configuration>
+                                <install-dir>${project.build.directory}/wildfly-${version.wildfly}</install-dir>
+                                <offline>false</offline>
+                                <feature-packs>
+                                    <feature-pack>
+                                        <groupId>org.wildfly.camel</groupId>
+                                        <artifactId>wildfly-camel-galleon-pack</artifactId>
+                                        <version>${project.version}</version>
+                                        <inherit-configs>true</inherit-configs>
+                                    </feature-pack>
+                                </feature-packs>
+                                <plugin-options>
+                                    <jboss-maven-dist/>
+                                    <jboss-fork-embedded/>
+                                </plugin-options>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- <plugin>
                     <groupId>org.wildfly.build</groupId>
                     <artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
                     <executions>
@@ -103,7 +137,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin> -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
