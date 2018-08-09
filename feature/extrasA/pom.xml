@@ -38,6 +38,18 @@
         <smartics.module.dir>${project.build.directory}/wildfly-patch/modules/system/layers/fuse</smartics.module.dir>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wildfly.camel</groupId>
+                <artifactId>wildfly-camel-bom</artifactId>
+                <version>${project.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <dependency>
@@ -61,6 +73,39 @@
             <version>${version.camel.hadoop2}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.wildfly.core</groupId>
+            <artifactId>wildfly-core-galleon-pack</artifactId>
+            <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-servlet-galleon-pack</artifactId>
+            <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-galleon-pack</artifactId>
+            <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.wildfly.camel</groupId>
             <artifactId>wildfly-camel-feature-modules</artifactId>
@@ -109,6 +154,18 @@
                             <artifactId>osgi_R4_core</artifactId>
                         </exclude>
                         <exclude>
+                            <groupId>org.wildfly.core</groupId>
+                            <artifactId>wildfly-core-galleon-pack</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-servlet-galleon-pack</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-galleon-pack</artifactId>
+                        </exclude>
+                        <exclude>
                             <groupId>org.wildfly.camel</groupId>
                             <artifactId>wildfly-camel-feature-modules</artifactId>
                         </exclude>
@@ -132,7 +189,7 @@
                             </target>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!-- <execution>
                         <id>feature-pack-xml</id>
                         <phase>process-classes</phase>
                         <goals>
@@ -144,41 +201,19 @@
                                 <copy file="${feature.pack.dir}/wildfly-feature-pack.xml" todir="${basedir}/etc" />
                             </target>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.wildfly.build</groupId>
-                <artifactId>wildfly-feature-pack-build-maven-plugin</artifactId>
+                <groupId>org.wildfly.galleon-plugins</groupId>
+                <artifactId>wildfly-galleon-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>feature-pack-build</id>
-                        <phase>compile</phase>
                         <goals>
-                            <goal>build</goal>
+                            <goal>build-feature-pack</goal>
                         </goals>
-                        <configuration>
-                            <config-file>scripts/feature-pack-build.xml</config-file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>scripts/assembly-feature-pack.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
