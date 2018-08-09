@@ -41,7 +41,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wildfly.camel</groupId>
-            <artifactId>wildfly-camel-feature-pack</artifactId>
+            <artifactId>wildfly-camel-galleon-pack</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
@@ -54,9 +54,13 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.jboss.galleon</groupId>
+                <artifactId>galleon-maven-plugin</artifactId>
+            </plugin>
+            <!-- <plugin>
                 <groupId>org.wildfly.build</groupId>
                 <artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

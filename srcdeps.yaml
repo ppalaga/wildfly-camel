@@ -37,14 +37,14 @@ repositories:
     urls:
     - git:https://github.com/wildfly-extras/fuse-patch.git
     buildVersionPattern: .*-SNAPSHOT
-    buildRef: revision-0eb2995de65b64b8abd3eaccebb22be2b8eebd6f
+    buildRef: revision-c6c9597979eaacfb6ef15ed2226876df0d9253bf
   org.wildfly.galleon-plugins:
     includes:
     - org.wildfly.galleon-plugins
     urls:
     - git:https://github.com/ppalaga/galleon-plugins.git
     buildVersionPattern: .*-SNAPSHOT
-    buildRef: revision-660cf37d1b08df17c8370562fb6a02097ad6067f
+    buildRef: revision-f909db817bb3d073898dbb05ed4c0f3ebc241082
     buildArguments:
     - -Dlicense.skip
     - -Dcheckstyle.skip
