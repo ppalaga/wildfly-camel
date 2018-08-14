@@ -83,7 +83,7 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -125,7 +125,9 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
+
+            <!-- re-introduce the checks
             <plugin>
                 <groupId>org.wildfly.build</groupId>
                 <artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
@@ -169,8 +171,9 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
+            </plugin> -->
+
+            <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -188,6 +191,19 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin> -->
+            <plugin>
+                <groupId>org.wildfly.galleon-plugins</groupId>
+                <artifactId>wildfly-galleon-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>feature-pack-build</id>
+                        <goals>
+                            <goal>build-feature-pack</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.ec4j.maven</groupId>
@@ -200,7 +216,7 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
+    <!-- <profiles>
         <profile>
             <id>update-licenses-xml</id>
             <activation>
@@ -334,7 +350,7 @@
             </build>
         </profile>
 
-        <!-- Activate this profile to download license info -->
+        Activate this profile to download license info
         <profile>
             <id>generate-licenses-xml</id>
             <build>
@@ -358,5 +374,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles> -->
 </project>

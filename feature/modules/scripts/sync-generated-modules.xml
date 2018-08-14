@@ -47,18 +47,6 @@
             </filterset>
         </copy>
 
-        <!-- Copy managed jar resources to patch -->
-        <property name="target.gravia.module.dir" value="${output.dir}/managed-jars/modules/system/layers/fuse/org/jboss/gravia/main" />
-        <copy file="${maven.dependency.org.apache.felix.org.apache.felix.configadmin.jar.path}" todir="${target.gravia.module.dir}" />
-        <copy file="${maven.dependency.org.apache.felix.org.apache.felix.log.jar.path}" todir="${target.gravia.module.dir}" />
-        <copy file="${maven.dependency.org.apache.felix.org.apache.felix.metatype.jar.path}" todir="${target.gravia.module.dir}" />
-        <copy file="${maven.dependency.org.apache.felix.org.apache.felix.scr.jar.path}" todir="${target.gravia.module.dir}" />
-        <copy todir="${output.dir}/managed-jars/modules" >
-            <fileset dir="${target.patch.dir}/modules">
-                <include name="**/*.jar" />
-            </fileset>
-        </copy>
-
         <!-- Sync source tree with Smartics generated XML files -->
         <sync todir="${resources.dir}/modules" overwrite="true" verbose="true">
             <fileset dir="${target.patch.dir}/modules">
