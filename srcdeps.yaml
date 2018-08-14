@@ -15,7 +15,7 @@ repositories:
     urls:
     - git:https://github.com/wildfly/galleon.git
     buildVersionPattern: .*-SNAPSHOT
-    buildRef: revision-3f3792c0952defa97abf499b37e93077306aa951
+    buildRef: revision-cd4b1d3cf65949544d551db238f56217b5ae2888
     buildArguments:
     - -Dlicense.skip
     - -Dcheckstyle.skip
@@ -44,7 +44,7 @@ repositories:
     urls:
     - git:https://github.com/ppalaga/galleon-plugins.git
     buildVersionPattern: .*-SNAPSHOT
-    buildRef: revision-f909db817bb3d073898dbb05ed4c0f3ebc241082
+    buildRef: revision-5c31a62361cfb13dcc7fc065b7c6c4a280846a42
     buildArguments:
     - -Dlicense.skip
     - -Dcheckstyle.skip

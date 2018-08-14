@@ -1032,14 +1032,8 @@
 
         <dependency>
             <groupId>org.wildfly</groupId>
-            <artifactId>wildfly-feature-pack</artifactId>
+            <artifactId>wildfly-galleon-pack</artifactId>
             <type>zip</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.hawt</groupId>
@@ -1086,8 +1080,16 @@
                             <artifactId>osgi_R4_core</artifactId>
                         </exclude>
                         <exclude>
+                            <groupId>org.wildfly.core</groupId>
+                            <artifactId>wildfly-core-galleon-pack</artifactId>
+                        </exclude>
+                        <exclude>
                             <groupId>org.wildfly</groupId>
-                            <artifactId>wildfly-feature-pack</artifactId>
+                            <artifactId>wildfly-servlet-galleon-pack</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-galleon-pack</artifactId>
                         </exclude>
                     </dependencyExcludes>
                 </configuration>
@@ -1109,7 +1111,7 @@
                             </target>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!-- <execution>
                         <id>feature-pack-xml</id>
                         <phase>process-classes</phase>
                         <goals>
@@ -1121,10 +1123,10 @@
                                 <copy file="${feature.pack.dir}/wildfly-feature-pack.xml" todir="${basedir}/etc" />
                             </target>
                         </configuration>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.wildfly.build</groupId>
                 <artifactId>wildfly-feature-pack-build-maven-plugin</artifactId>
                 <executions>
@@ -1136,6 +1138,7 @@
                         </goals>
                         <configuration>
                             <config-file>scripts/feature-pack-build.xml</config-file>
+
                         </configuration>
                     </execution>
                 </executions>
@@ -1156,6 +1159,19 @@
                                 <descriptor>scripts/assembly-feature-pack.xml</descriptor>
                             </descriptors>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin> -->
+            <plugin>
+                <groupId>org.wildfly.galleon-plugins</groupId>
+                <artifactId>wildfly-galleon-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>feature-pack-build</id>
+                        <goals>
+                            <goal>build-feature-pack</goal>
+                        </goals>
+                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>
