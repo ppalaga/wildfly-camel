@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+
+<tasks xmlns="urn:wildfly:wildfly-feature-pack-tasks:2.0">
+    <copy-artifact artifact="org.apache.felix:org.apache.felix.configadmin" to-location="modules/system/layers/fuse/org/jboss/gravia/main/"/>
+    <copy-artifact artifact="org.apache.felix:org.apache.felix.log" to-location="modules/system/layers/fuse/org/jboss/gravia/main/"/>
+    <copy-artifact artifact="org.apache.felix:org.apache.felix.metatype" to-location="modules/system/layers/fuse/org/jboss/gravia/main/"/>
+    <copy-artifact artifact="org.apache.felix:org.apache.felix.scr" to-location="modules/system/layers/fuse/org/jboss/gravia/main/"/>
+</tasks>
