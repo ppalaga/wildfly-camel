@@ -65,9 +65,9 @@
         <!-- WildFly versions -->
         <version.wildfly>14.0.0.Beta2-SNAPSHOT</version.wildfly>
         <version.wildfly.arquillian>2.1.1.Final</version.wildfly.arquillian>
-        <version.wildfly.cxf>3.2.5</version.wildfly.cxf>
+        <version.wildfly.cxf>3.2.5-jbossorg-1</version.wildfly.cxf>
         <version.wildfly.fasterxml.jackson>2.9.5</version.wildfly.fasterxml.jackson>
-        <version.wildfly.infinispan>9.2.5.Final</version.wildfly.infinispan>
+        <version.wildfly.infinispan>9.3.1.Final</version.wildfly.infinispan>
 
         <!-- Other versions -->
         <version.apache.ds>2.0.0-M21</version.apache.ds>
