@@ -22,15 +22,15 @@
 
 <build xmlns="urn:wildfly:feature-pack-build:3.0" producer="wildfly-camel-feature-modules@maven(org.jboss.universe:community-universe):current">
     <transitive>
-        <dependency group-id="org.wildfly.core" artifact-id="wildfly-core-galleon-pack" producer="wildfly-core@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly.core" artifact-id="wildfly-core-galleon-pack">
             <name>org.wildfly.core:wildfly-core-galleon-pack</name>
         </dependency>
-        <dependency group-id="org.wildfly" artifact-id="wildfly-servlet-galleon-pack" producer="wildfly-servlet@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly" artifact-id="wildfly-servlet-galleon-pack">
             <name>org.wildfly:wildfly-servlet-galleon-pack</name>
         </dependency>
     </transitive>
     <dependencies>
-        <dependency group-id="org.wildfly" artifact-id="wildfly-galleon-pack" producer="wildfly@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly" artifact-id="wildfly-galleon-pack">
             <name>org.wildfly:wildfly-galleon-pack</name>
         </dependency>
     </dependencies>
@@ -39,5 +39,4 @@
         <package name="gravia-managed-jars"/>
         <package name="hawtio-wildfly.war"/>
     </default-packages>
-    <!-- <include-plugin>false</include-plugin> -->
 </build>
