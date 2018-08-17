@@ -197,6 +197,22 @@
                 <artifactId>wildfly-galleon-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>feature-spec-build</id>
+                        <goals>
+                            <goal>generate-feature-specs</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <fork-embedded>true</fork-embedded>
+                            <output-dir>${basedir}/target/resources/features</output-dir>
+                            <standalone-extensions>
+                                <extension>org.wildfly.extension.camel</extension>
+                            </standalone-extensions>
+                            <domain-extensions></domain-extensions>
+                            <host-extensions></host-extensions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>feature-pack-build</id>
                         <goals>
                             <goal>build-feature-pack</goal>
