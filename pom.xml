@@ -67,6 +67,7 @@
 
         <!-- WildFly versions -->
         <version.wildfly>14.0.0.Beta2-SNAPSHOT</version.wildfly>
+        <tmp.version.wildfly.core>6.0.0.Beta1</tmp.version.wildfly.core>
         <version.internal.wildfly.core>6.0.0.Alpha4</version.internal.wildfly.core>
         <version.wildfly.arquillian>2.1.1.Final</version.wildfly.arquillian>
         <version.wildfly.cxf>3.2.5-jbossorg-1</version.wildfly.cxf>
