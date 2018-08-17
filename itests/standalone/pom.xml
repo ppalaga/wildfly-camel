@@ -127,7 +127,13 @@
                                         <groupId>org.wildfly.camel</groupId>
                                         <artifactId>wildfly-camel-feature-pack</artifactId>
                                         <version>${project.version}</version>
-                                        <inherit-configs>true</inherit-configs>
+                                        <inherit-configs>false</inherit-configs>
+                                        <included-configs>
+                                            <config>
+                                                <model>standalone</model>
+                                                <name>standalone.xml</name>
+                                            </config>
+                                        </included-configs>
                                     </feature-pack>
                                 </feature-packs>
                                 <plugin-options>
@@ -155,7 +161,7 @@
                         </execution>
                     </executions>
                 </plugin> -->
-                <plugin>
+                <!-- <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <executions>
@@ -170,11 +176,11 @@
                                 <environmentVariables>
                                     <JBOSS_HOME>${jboss.home}</JBOSS_HOME>
                                 </environmentVariables>
-                                <commandlineArgs>-jar ${jboss.home}/jboss-modules.jar -mp ${jboss.home}/modules org.wildfly.extras.config.plugin.camel --configs camel --enable</commandlineArgs>
+                                <commandlineArgs>-jar ${jboss.home}/jboss-modules.jar -mp ${jboss.home}/modules org.wildfly.extras.config.plugin.camel - -configs camel - -enable</commandlineArgs>
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin> -->
             </plugins>
         </pluginManagement>
         <plugins>

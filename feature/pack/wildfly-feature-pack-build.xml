@@ -22,16 +22,16 @@
 
 <build xmlns="urn:wildfly:feature-pack-build:3.0" producer="wildfly-camel-feature-pack@maven(org.jboss.universe:community-universe):current">
     <dependencies>
-        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-modules" producer="wildfly-camel-feature-modules@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-modules">
             <name>org.wildfly.camel:wildfly-camel-feature-modules</name>
         </dependency>
-        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasA" producer="wildfly-camel-feature-extrasA@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasA">
             <name>org.wildfly.camel:wildfly-camel-feature-extrasA</name>
         </dependency>
-        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasB" producer="wildfly-camel-feature-extrasB@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasB">
             <name>org.wildfly.camel:wildfly-camel-feature-extrasB</name>
         </dependency>
-        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasC" producer="wildfly-camel-feature-extrasC@maven(org.jboss.universe:community-universe):current">
+        <dependency group-id="org.wildfly.camel" artifact-id="wildfly-camel-feature-extrasC">
             <name>org.wildfly.camel:wildfly-camel-feature-extrasC</name>
         </dependency>
     </dependencies>
@@ -39,5 +39,16 @@
         <package name="layers.conf"/>
         <package name="product.conf"/>
     </default-packages>
-    <include-plugin>false</include-plugin>
+
+    <config name="standalone.xml" model="standalone">
+        <feature-group name="standalone"/>
+    </config>
+
+    <generate-feature-specs>
+        <extensions>
+            <standalone>
+                <extension>org.wildfly.extension.camel</extension>
+            </standalone>
+        </extensions>
+    </generate-feature-specs>
 </build>

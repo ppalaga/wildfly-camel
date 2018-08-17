@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature-group-spec name="standalone" xmlns="urn:jboss:galleon:feature-group:1.0">
+    <feature spec="subsystem.camel" />
+    <feature spec="system-property">
+        <param name="system-property" value="hawtio.authenticationEnabled"/>
+        <param name="value" value="true"/>
+    </feature>
+    <feature spec="system-property">
+        <param name="system-property" value="hawtio.realm"/>
+        <param name="value" value="hawtio-domain"/>
+    </feature>
+</feature-group-spec>

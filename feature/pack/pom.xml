@@ -193,9 +193,53 @@
                 </executions>
             </plugin> -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.wildfly.galleon-plugins</groupId>
                 <artifactId>wildfly-galleon-maven-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>feature-spec-build</id>
+                        <goals>
+                            <goal>generate-feature-specs</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <fork-embedded>false</fork-embedded>
+                            <output-dir>${basedir}/target/resources/features</output-dir>
+                            <external-artifacts>
+                                <external-artifact>
+                                    <artifactItem>
+                                        <groupId>org.apache.activemq</groupId>
+                                        <artifactId>artemis-native</artifactId>
+                                        <version>${version.org.apache.activemq.artemis}</version>
+                                    </artifactItem>
+                                    <includes>lib/**</includes>
+                                    <excludes>*.*</excludes>
+                                    <toLocation>system/layers/base/org/apache/activemq/artemis/journal/main</toLocation>
+                                </external-artifact>
+                            </external-artifacts>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>feature-pack-build</id>
                         <goals>
