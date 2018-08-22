@@ -66,8 +66,8 @@
         <version.camel.rxjava2>2.1.16</version.camel.rxjava2>
 
         <!-- WildFly versions -->
-        <version.wildfly>14.0.0.Beta2-SNAPSHOT</version.wildfly>
-        <tmp.version.wildfly.core>6.0.0.Beta1</tmp.version.wildfly.core>
+        <version.wildfly>14.0.0.CR1-SNAPSHOT</version.wildfly>
+        <tmp.version.wildfly.core>6.0.0.CR3-SNAPSHOT</tmp.version.wildfly.core>
         <version.internal.wildfly.core>6.0.0.Alpha4</version.internal.wildfly.core>
         <version.wildfly.arquillian>2.1.1.Final</version.wildfly.arquillian>
         <version.wildfly.cxf>3.2.5-jbossorg-1</version.wildfly.cxf>
@@ -132,7 +132,7 @@
         <version-shrinkwrap-resolver-maven-plugin>2.2.6</version-shrinkwrap-resolver-maven-plugin>
         <version-smartics-maven-plugin>2.1.5</version-smartics-maven-plugin>
         <version-wildfly-build-tools>1.2.10.Final</version-wildfly-build-tools>
-        <version-wildfly-galleon-plugin>2.0.0.Beta1</version-wildfly-galleon-plugin>
+        <version-wildfly-galleon-plugin>2.0.0.Beta3-SNAPSHOT</version-wildfly-galleon-plugin>
         <version-wildfly-licenses-plugin>2.0.0.Beta1</version-wildfly-licenses-plugin>
         <version-wildfly-maven-plugin>1.2.2.Final</version-wildfly-maven-plugin>
         <version-xml-maven-plugin>1.0.1</version-xml-maven-plugin>

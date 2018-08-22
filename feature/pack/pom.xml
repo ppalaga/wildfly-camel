@@ -203,7 +203,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <fork-embedded>true</fork-embedded>
+                            <fork-embedded>false</fork-embedded>
                             <output-dir>${basedir}/target/resources/features</output-dir>
                             <feature-packs>
                                 <feature-pack>
