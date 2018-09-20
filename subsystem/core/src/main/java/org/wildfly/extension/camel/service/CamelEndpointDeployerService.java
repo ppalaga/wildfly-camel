@@ -21,6 +21,7 @@ package org.wildfly.extension.camel.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -320,7 +321,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
 
     private final InjectedValue<DeploymentInfo> deploymentInfoSupplier = new InjectedValue<>();
 
-    private final Map<URI, Deployment> deployments = new HashMap<>();
+    private final Map<URI, Map.Entry<DeploymentManager, Deployment>> deployments = new HashMap<>();
 
     private final InjectedValue<CamelEndpointDeploymentSchedulerService> deploymentSchedulerServiceSupplier = new InjectedValue<>();
 
@@ -369,7 +370,7 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
             throw new IllegalStateException(ex);
         }
         synchronized (deployments) {
-            deployments.put(uri, deployment);
+            deployments.put(uri, new AbstractMap.SimpleImmutableEntry(manager, deployment));
         }
     }
 
@@ -384,10 +385,8 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
     @Override
     public void stop(StopContext context) {
         synchronized (deployments) {
-            for (Deployment deployment : deployments.values()) {
-                CamelLogger.LOGGER.debug("Undeploying endpoint {}",
-                        deployment.getDeploymentInfo().getDeploymentName());
-                hostSupplier.getValue().unregisterDeployment(deployment);
+            for (Map.Entry<DeploymentManager, Deployment> en : deployments.values()) {
+                undeploy(en);
             }
             deployments.clear();
         }
@@ -400,18 +399,26 @@ public class CamelEndpointDeployerService implements Service<CamelEndpointDeploy
      */
     public void undeploy(URI uri) {
         synchronized (deployments) {
-            Deployment removedDeployment = deployments.remove(uri);
+            Entry<DeploymentManager, Deployment> removedDeployment = deployments.remove(uri);
             if (removedDeployment != null) {
-                CamelLogger.LOGGER.debug("Undeploying endpoint {}",
-                        removedDeployment.getDeploymentInfo().getDeploymentName());
                 try {
-                    hostSupplier.getValue().unregisterDeployment(removedDeployment);
+                    undeploy(removedDeployment);
                 } catch (IllegalStateException e) {
                     CamelLogger.LOGGER.warn("Could not undeploy endpoint "
-                            + removedDeployment.getDeploymentInfo().getDeploymentName(), e);
+                            + removedDeployment.getValue().getDeploymentInfo().getDeploymentName(), e);
                 }
             }
         }
+    }
+
+    private void undeploy(Entry<DeploymentManager, Deployment> entry) {
+        final Deployment deployment = entry.getValue();
+        CamelLogger.LOGGER.debug("Undeploying endpoint {}",
+                deployment.getDeploymentInfo().getDeploymentName());
+        hostSupplier.getValue().unregisterDeployment(deployment);
+        final DeploymentManager deploymentManager = entry.getKey();
+        deploymentManager.undeploy();
+        servletContainerServiceSupplier.getValue().getServletContainer().removeDeployment(deployment.getDeploymentInfo());
     }
 
     @SuppressWarnings("serial")
