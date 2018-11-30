@@ -37,6 +37,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.After;
 import org.junit.Assert;
@@ -68,6 +69,7 @@ public class HazelcastMapProducerIntegrationTest {
     public static JavaArchive deployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "hazelcast-map-producer-tests");
         archive.addPackages(true, Mockito.class.getPackage(), Objenesis.class.getPackage(), ByteBuddy.class.getPackage());
+        archive.addAsManifestResource(new StringAsset("Dependencies: jdk.unsupported\n" /* required by Mockito */), "MANIFEST.MF");
         return archive;
     }
 

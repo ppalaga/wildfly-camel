@@ -30,6 +30,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +56,7 @@ public class NagiosIntegrationTest {
     public static JavaArchive createDeployment() {
         final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "camel-nagios-test");
         archive.addPackages(true, Mockito.class.getPackage(), Objenesis.class.getPackage(), ByteBuddy.class.getPackage());
+        archive.addAsManifestResource(new StringAsset("Dependencies: jdk.unsupported\n" /* required by Mockito */), "MANIFEST.MF");
         return archive;
     }
 

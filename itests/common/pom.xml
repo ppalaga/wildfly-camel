@@ -142,7 +142,8 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--jibx doesn't work with JDK9+, and it's quite old and seems no one maintain this anymore-->
+            <!--plugin>
                 <groupId>org.jibx</groupId>
                 <artifactId>maven-jibx-plugin</artifactId>
                 <configuration>
@@ -158,7 +159,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin-->
         </plugins>
     </build>
 </project>

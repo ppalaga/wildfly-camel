@@ -38,6 +38,7 @@ import org.apache.http.message.BasicStatusLine;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,6 +63,7 @@ public class HipchatConsumerIntegrationTest {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "camel-hipchat-tests.jar");
         archive.addPackages(true, Mockito.class.getPackage(), Objenesis.class.getPackage(), ByteBuddy.class.getPackage());
         archive.addClasses(HipchatEPSuccessTestSupport.class);
+        archive.addAsManifestResource(new StringAsset("Dependencies: jdk.unsupported\n" /* required by Mockito */), "MANIFEST.MF");
         return archive;
     }
 

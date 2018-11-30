@@ -244,7 +244,8 @@
         <include artifact=":jaxb-api" />
         <include artifact=":jaxb-core" />
         <include artifact=":jaxb-impl" />
-        <include artifact=":jboss-jaxb-api_2.2_spec" />
+        <include artifact="org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.2_spec" />
+        <include artifact="org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec" />
     </module>
 
     <module name="javax.xml.stream.api" skip="true">
