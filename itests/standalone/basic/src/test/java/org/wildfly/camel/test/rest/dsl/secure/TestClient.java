@@ -65,6 +65,12 @@ public class TestClient implements Closeable {
         assertResponse(path, method, null, null, 401);
     }
 
+    public void assertResponse(String path, String method, int responseCode)
+            throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
+            CertificateException, IOException {
+        assertResponse(path, method, null, null, responseCode);
+    }
+
     public void assertResponse(String path, String method, String user, String password, int responseCode)
             throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException,
             CertificateException, IOException {
