@@ -102,7 +102,7 @@
         <version-galleon-maven-plugin>3.0.0.CR1</version-galleon-maven-plugin>
         <version-groovy-maven-plugin>2.1</version-groovy-maven-plugin>
         <version-jibx-maven-plugin>1.3.1</version-jibx-maven-plugin>
-        <version-license-maven-plugin>1.16</version-license-maven-plugin>
+        <version-license-maven-plugin>1.18-SNAPSHOT</version-license-maven-plugin>
         <version-maven-antrun-plugin>1.8</version-maven-antrun-plugin>
         <version-maven-archetype-plugin>3.0.1</version-maven-archetype-plugin>
         <version-maven-assembly-plugin>3.1.0</version-maven-assembly-plugin>

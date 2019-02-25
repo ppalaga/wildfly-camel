@@ -4,6 +4,7 @@
 
     <xsl:output method="html" encoding="utf-8" standalone="no" media-type="text/html" />
     <xsl:param name="version"/>
+    <xsl:param name="product.release.name"/>
     <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz '" />
     <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ!'" />
 
@@ -14,7 +15,7 @@
                 <link rel="stylesheet" type="text/css" href="licenses.css"/>
             </head>
             <body>
-                <h2>Red Hat Fuse</h2>
+                <h2><xsl:value-of select="$product.release.name"/><xsl:text> </xsl:text><xsl:value-of select="substring-before($version, '-')"/> - Feature Pack</h2>
                 <p>The following material has been provided for informational purposes only, and should not be relied upon or construed as a legal opinion or legal advice.</p>
                 <!-- Read matching templates -->
                 <table>
@@ -44,14 +45,8 @@
                                 </xsl:for-each>
                             </td>
                             <td>
-                                <xsl:for-each select="licenses/license">
-                                    <xsl:variable name="filename">
-                                        <xsl:call-template name="remap-local-filename">
-                                            <xsl:with-param name="name" select="name" />
-                                            <xsl:with-param name="file" select="file" />
-                                        </xsl:call-template>
-                                    </xsl:variable>
-                                    <a href="{$filename}"><xsl:value-of select="$filename"/></a><br/>
+                                <xsl:for-each select="licenses/license/file">
+                                    <a href="{text()}"><xsl:value-of select="text()"/></a><br/>
                                 </xsl:for-each>
                             </td>
                         </tr>
@@ -61,16 +56,4 @@
         </html>
     </xsl:template>
 
-    <xsl:template name="remap-local-filename">
-        <xsl:param name="name"/>
-        <xsl:param name="file"/>
-        <xsl:choose>
-            <xsl:when test="contains(translate($name, $uppercase, $lowercase), 'public domain')">
-                <xsl:text>public-domain.txt</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="$file"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
 </xsl:stylesheet>

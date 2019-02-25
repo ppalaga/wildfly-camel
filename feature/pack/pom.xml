@@ -36,7 +36,8 @@
 
     <properties>
         <license.dir>${project.basedir}/src/main/resources/license</license.dir>
-        <license.output.dir>${project.build.directory}/licenses</license.output.dir>
+        <galleon.license.resources.dir>${project.build.directory}/resources/content/docs/licenses</galleon.license.resources.dir>
+        <galleon.licenses.xml.path>${galleon.license.resources.dir}/wildfly-camel-feature-pack-licenses.xml</galleon.licenses.xml.path>
         <wildfly.camel.dir>${project.build.directory}/wildfly-camel-${project.version}</wildfly.camel.dir>
         <wildfly-camel-feature-pack.basedir>${project.basedir}</wildfly-camel-feature-pack.basedir>
     </properties>
@@ -91,9 +92,64 @@
                         <goals>
                             <goal>provision</goal>
                         </goals>
-                        <phase>verify</phase>
+                        <phase>compile</phase>
                         <configuration>
                             <install-dir>${project.build.directory}/wildfly-camel-${project.version}</install-dir>
+                            <offline>false</offline>
+                            <resolve-locals>
+                                <resolve-local>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-modules</artifactId>
+                                    <version>${project.version}</version>
+                                </resolve-local>
+                                <resolve-local>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-extrasA</artifactId>
+                                    <version>${project.version}</version>
+                                </resolve-local>
+                                <resolve-local>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-extrasB</artifactId>
+                                    <version>${project.version}</version>
+                                </resolve-local>
+                                <resolve-local>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-extrasC</artifactId>
+                                    <version>${project.version}</version>
+                                </resolve-local>
+                            </resolve-locals>
+                            <feature-packs>
+                                <!-- We cannot provision wildfly-camel-feature-pack because it is not ready yet in the
+                                     compile phase. But at the same time we need a module tree to
+                                     run module-checker.groovy and to produce fuse-resources.txt used for licenses.xml.
+                                     So we fall back to provisioning wildfly-camel-feature-extras[C,B] (which also
+                                     installs A and modules). That's OK as long as wildfly-camel-feature-pack does not
+                                     contain any JBoss modules. -->
+                                <feature-pack>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-extrasB</artifactId>
+                                    <version>${project.version}</version>
+                                </feature-pack>
+                                <feature-pack>
+                                    <groupId>org.wildfly.camel</groupId>
+                                    <artifactId>wildfly-camel-feature-extrasC</artifactId>
+                                    <version>${project.version}</version>
+                                </feature-pack>
+                            </feature-packs>
+                            <plugin-options>
+                                <jboss-fork-embedded/>
+                                <jboss-maven-dist/>
+                            </plugin-options>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>provision-wildfly-camel-test</id>
+                        <goals>
+                            <goal>provision</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <install-dir>${project.build.directory}/wildfly-camel-${project.version}-test</install-dir>
                             <offline>false</offline>
                             <resolve-locals>
                                 <resolve-local>
@@ -127,7 +183,6 @@
                                     <groupId>org.wildfly.camel</groupId>
                                     <artifactId>wildfly-camel-feature-pack</artifactId>
                                     <version>${project.version}</version>
-                                    <inherit-configs>true</inherit-configs>
                                 </feature-pack>
                             </feature-packs>
                             <plugin-options>
@@ -148,7 +203,7 @@
                         <goals>
                             <goal>execute</goal>
                         </goals>
-                        <phase>verify</phase>
+                        <phase>compile</phase>
                         <configuration>
                             <source>${project.basedir}/scripts/module-checker.groovy</source>
                         </configuration>
@@ -180,9 +235,8 @@
             </plugin>
         </plugins>
     </build>
-    <!-- <profiles>
+    <profiles>
         <profile>
-            Needs to get re-enabled - see https://github.com/wildfly-extras/wildfly-camel/issues/2700
             <id>update-licenses-xml</id>
             <activation>
                 <property>
@@ -191,39 +245,6 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.gmaven</groupId>
-                        <artifactId>groovy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>update-licenses-xml</id>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
-                                <phase>compile</phase>
-                                <configuration>
-                                    <source>${project.basedir}/scripts/update-licenses-xml.groovy</source>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>update-licenses-dependencies</id>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
-                                <phase>prepare-package</phase>
-                                <configuration>
-                                    <source>${project.basedir}/scripts/update-licenses-dependencies.groovy</source>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.httpcomponents</groupId>
-                                <artifactId>httpclient</artifactId>
-                                <version>${version.camel.httpclient}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-resources-plugin</artifactId>
@@ -235,7 +256,7 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${license.output.dir}</outputDirectory>
+                                    <outputDirectory>${galleon.license.resources.dir}</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>${license.dir}/licenses</directory>
@@ -268,45 +289,9 @@
                                 <phase>compile</phase>
                                 <configuration>
                                     <licensesConfigFile>${license.dir}/licenses.xml</licensesConfigFile>
-                                    <licensesOutputDirectory>${license.output.dir}</licensesOutputDirectory>
-                                    <licensesOutputFile>${license.output.dir}/licenses.xml</licensesOutputFile>
+                                    <licensesOutputDirectory>${galleon.license.resources.dir}</licensesOutputDirectory>
+                                    <licensesOutputFile>${galleon.licenses.xml.path}</licensesOutputFile>
                                     <sortByGroupIdAndArtifactId>true</sortByGroupIdAndArtifactId>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>xml-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>generate-licenses-html</id>
-                                <goals>
-                                    <goal>transform</goal>
-                                </goals>
-                                <phase>prepare-package</phase>
-                                <configuration>
-                                    <transformationSets>
-                                        <transformationSet>
-                                            <dir>${license.output.dir}</dir>
-                                            <includes>
-                                                <include>*licenses.xml</include>
-                                            </includes>
-                                            <stylesheet>${license.dir}/assets/licenses.xsl</stylesheet>
-                                            <outputDir>${license.output.dir}</outputDir>
-                                            <fileMappers>
-                                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
-                                                    <targetExtension>.html</targetExtension>
-                                                </fileMapper>
-                                            </fileMappers>
-                                            <parameters>
-                                                <parameter>
-                                                    <name>version</name>
-                                                    <value>${project.version}</value>
-                                                </parameter>
-                                            </parameters>
-                                        </transformationSet>
-                                    </transformationSets>
                                 </configuration>
                             </execution>
                         </executions>
@@ -315,7 +300,7 @@
             </build>
         </profile>
 
-        Activate this profile to download license info
+        <!-- Activate this profile to download license info -->
         <profile>
             <id>generate-licenses-xml</id>
             <build>
@@ -325,13 +310,89 @@
                         <artifactId>license-maven-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>generate-licenses-xml</id>
                                 <goals>
                                     <goal>download-licenses</goal>
                                 </goals>
-                                <phase>generate-resources</phase>
+                                <phase>process-classes</phase>
                                 <configuration>
+                                    <licensesConfigFile>${basedir}/etc/licenses/licenses-config.xml</licensesConfigFile>
                                     <licensesOutputDirectory>${license.dir}/licenses</licensesOutputDirectory>
                                     <licensesOutputFile>${license.dir}/licenses.xml</licensesOutputFile>
+                                    <sortByGroupIdAndArtifactId>true</sortByGroupIdAndArtifactId>
+                                    <errorRemedy>xmlOutput</errorRemedy>
+                                    <forceDownload>true</forceDownload>
+                                    <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                                    <writeVersions>false</writeVersions>
+                                    <artifactFiltersUrl>${project.baseUri}/target/fuse-resources.txt</artifactFiltersUrl>
+                                    <socketTimeout>15000</socketTimeout>
+                                    <licenseUrlReplacements>
+                                        <licenseUrlReplacement>
+                                            <regexp>\Qhttp://www.day.com/content/dam/day/downloads/jsr283/LICENSE.txt\E</regexp>
+                                            <replacement>https://web.archive.org/web/20100220121505id_/http://www.day.com/content/dam/day/downloads/jsr283/LICENSE.txt</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>\Qhttp://www.day.com/dam/day/downloads/jsr283/day-spec-license.htm\E</regexp>
+                                            <replacement>https://web.archive.org/web/20100220121453id_/http://www.day.com/dam/day/downloads/jsr283/day-spec-license.htm</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>\Qhttp://www.mozilla.org/MPL/MPL-1.1.txt\E</regexp>
+                                            <replacement>https://www.mozilla.org/media/MPL/1.1/index.0c5913925d40.txt</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>https?://glassfish\.(dev\.)?java\.net/(nonav/)?public/CDDL\+GPL(_1_1)?\.html</regexp>
+                                            <replacement>https://raw.githubusercontent.com/javaee/glassfish/master/LICENSE</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>https?\Q://glassfish.dev.java.net/\E(nonav/)?\Qpublic/CDDLv1.0.html\E</regexp>
+                                            <replacement>https://opensource.org/licenses/CDDL-1.0</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>https?://(www\.)opensource.org/licenses/mit-license.php</regexp>
+                                            <replacement>https://www.opensource.org/licenses/MIT</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>^https?://github\.com/([^/]+)/([^/]+)/blob/(.*)$</regexp>
+                                            <replacement>https://raw.githubusercontent.com/$1/$2/$3</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>^https?://(www\.)creativecommons.org/licenses/([^/]+)/([^/]+)/$</regexp>
+                                            <replacement>http://creativecommons.org/licenses/$1/$2/legalcode</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>^https?://(www\.)apache\.org/license/LICENSE-2\.0\.txt$</regexp>
+                                            <replacement>https://www.apache.org/licenses/LICENSE-2.0.txt</replacement>
+                                        </licenseUrlReplacement>
+                                        <licenseUrlReplacement>
+                                            <regexp>^https?://repository\.jboss\.com/licenses/lgpl\.txt$</regexp>
+                                            <replacement>https://web.archive.org/web/20171202125112id_/http://repository.jboss.com/licenses/lgpl.txt</replacement>
+                                        </licenseUrlReplacement>
+                                    </licenseUrlReplacements>
+                                    <licenseUrlFileNames>
+                                        <spdx/>
+                                        <bsd-antlr.html>https?://(www\.)?antlr\.org/license\.html</bsd-antlr.html>
+                                        <edl-v10.html>https?://(www\.)?eclipse\.org/org/documents/edl-v10\.php</edl-v10.html>
+                                        <lgpl-3.0.txt>
+                                            sha1:a8a12e6867d7ee39c21d9b11a984066099b6fb6b
+                                            https?://(www\.)?gnu\.org/licenses/lgpl\.txt
+                                            https?://(www\.)?fsf\.org/licensing/licenses/lgpl\.txt
+                                        </lgpl-3.0.txt>
+                                        <lgpl-2.1.txt>
+                                            sha1:01a6b4bf79aca9b556822601186afab86e8c4fbf
+                                            https?://(www\.)?gnu\.org/licenses/old-licenses/lgpl-2\.1\.txt
+                                            https?://repository\.jboss\.org/licenses/lgpl-2\.1\.txt
+                                        </lgpl-2.1.txt>
+                                    </licenseUrlFileNames>
+                                    <licenseUrlFileNameSanitizers>
+                                        <licenseUrlFileNameSanitizer>
+                                            <regexp>[\s-_,;]+</regexp>
+                                            <replacement>-</replacement>
+                                        </licenseUrlFileNameSanitizer>
+                                        <licenseUrlFileNameSanitizer>
+                                            <regexp>-($|\.)</regexp>
+                                            <replacement>$1</replacement>
+                                        </licenseUrlFileNameSanitizer>
+                                    </licenseUrlFileNameSanitizers>
                                 </configuration>
                             </execution>
                         </executions>
@@ -339,5 +400,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles> -->
+    </profiles>
 </project>
