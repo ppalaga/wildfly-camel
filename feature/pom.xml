@@ -97,6 +97,7 @@
                     <socketTimeout>15000</socketTimeout>
                     <useDefaultContentSanitizers>true</useDefaultContentSanitizers>
                     <useDefaultUrlReplacements>true</useDefaultUrlReplacements>
+                    <writeVersions>false</writeVersions>
                     <licenseUrlReplacements>
                         <licenseUrlReplacement>
                             <regexp>\Qhttp://www.day.com/content/dam/day/downloads/jsr283/LICENSE.txt\E</regexp>
@@ -159,16 +160,6 @@
                         <spdx />
                         <bsd-antlr.html>https?://(www\.)?antlr\.org/license\.html</bsd-antlr.html>
                         <edl-v10.html>https?://(www\.)?eclipse\.org/org/documents/edl-v10\.php</edl-v10.html>
-                        <lgpl-3.0.txt>
-                            sha1:a8a12e6867d7ee39c21d9b11a984066099b6fb6b
-                            https?://(www\.)?gnu\.org/licenses/lgpl\.txt
-                            https?://(www\.)?fsf\.org/licensing/licenses/lgpl\.txt
-                        </lgpl-3.0.txt>
-                        <lgpl-2.1.txt>
-                            sha1:01a6b4bf79aca9b556822601186afab86e8c4fbf
-                            https?://(www\.)?gnu\.org/licenses/old-licenses/lgpl-2\.1\.txt
-                            https?://repository\.jboss\.org/licenses/lgpl-2\.1\.txt
-                        </lgpl-2.1.txt>
                         <mit-license-auth0.txt>
                             sha1:44258edfa65d99689f3b8e939a04fe98815dba66
                             \Qhttps://raw.githubusercontent.com/auth0/java-jwt/master/LICENSE\E

@@ -1,3 +1,10 @@
+=== An example Apache Software License 1.1 file ===
+
+The 1.1 version of the Apache License was approved by the ASF in 2000. 
+
+The primary change from the 1.0 license was in the removal of the 'advertising clause' (section 3 of the 1.0 license); derived products are no longer required to include attribution in their advertising materials, only in their documentation.
+
+
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
